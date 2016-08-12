@@ -107,6 +107,7 @@ class OutgoingSocketThread extends SocketThreadBase {
         if (mServerSocket != null) {
             try {
                 mServerSocket.close();
+                Log.e(mTag, " Closed the server socket");
             } catch (IOException e) {
                 Log.e(mTag, "Failed to close the server socket: " + e.getMessage(), e);
             }

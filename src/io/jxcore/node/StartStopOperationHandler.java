@@ -15,7 +15,7 @@ import java.util.Date;
  */
 public class StartStopOperationHandler {
     private static final String TAG = StartStopOperationHandler.class.getName();
-    private static final long OPERATION_TIMEOUT_IN_MILLISECONDS = 3000;
+    private static final long OPERATION_TIMEOUT_IN_MILLISECONDS = 10000;
     private final ConnectionManager mConnectionManager;
     private final DiscoveryManager mDiscoveryManager;
     private CountDownTimer mOperationTimeoutTimer = null;
@@ -141,10 +141,14 @@ public class StartStopOperationHandler {
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
                     mCurrentOperation = null;
                 }
+                boolean shouldAdvertise = !shouldStartOrStopListeningToAdvertisementsOnly;
 
+//                if (shouldStartOrStopListeningToAdvertisementsOnly){
+//                    shouldAdvertise = mDiscoveryManager.isAdvertising();
+//                }
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,
-                        !shouldStartOrStopListeningToAdvertisementsOnly)) {
+                        shouldAdvertise)) {
                     final String errorMessage = "Failed to start the discovery manager";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
@@ -184,6 +188,7 @@ public class StartStopOperationHandler {
                     if (mCurrentOperation != null) {
                         String errorMessage = "Operation timeout, state error: " + isTargetState(mCurrentOperation);
                         Log.d(TAG, errorMessage);
+                        Log.e(TAG, "current op = " + mCurrentOperation.toString());
                         mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
                         mCurrentOperation = null;
                         mOperationTimeoutTimer = null;
@@ -217,7 +222,7 @@ public class StartStopOperationHandler {
         DiscoveryManagerSettings discoveryManagerSettings = DiscoveryManagerSettings.getInstance(null);
         int extraInformation = discoveryManagerSettings.getBeaconAdExtraInformation() + 1;
         if (extraInformation > 255) {
-            extraInformation = 0;
+            extraInformation = 1;
         }
         Log.i(TAG, "updateBeaconAdExtraInformation: New value: " + extraInformation);
         discoveryManagerSettings.setBeaconAdExtraInformation(extraInformation);

@@ -227,13 +227,13 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
     @Override
     public void onStreamCopySucceeded(StreamCopyingThread who, int numberOfBytes) {
         // Uncomment the following to debug chunks of data transferred
-        /*if (who == mReceivingThread) {
+        if (who == mReceivingThread) {
             Log.d(mTag, "The receiving thread succeeded to read/write " + numberOfBytes + " bytes");
         } else if (who == mSendingThread) {
             Log.d(mTag, "The sending thread succeeded to read/write " + numberOfBytes + " bytes");
         } else {
             Log.w(mTag, "An unidentified stream copying thread succeeded to read/write " + numberOfBytes + " bytes");
-        }*/
+        }
 
         mListener.onDataTransferred(numberOfBytes);
     }
