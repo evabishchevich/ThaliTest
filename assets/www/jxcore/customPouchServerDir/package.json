@@ -1,0 +1,33 @@
+{
+  "name": "pouchdb-server-monorepo",
+  "description": "A standalone REST interface server for PouchDB.",
+  "version": "0.0.0",
+  "homepage": "https://github.com/pouchdb/pouchdb-server",
+  "private": true,
+  "author": {
+    "name": "Nick Thompson",
+    "email": "ncthom91@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pouchdb/pouchdb-server.git"
+  },
+  "scripts": {
+    "build": "lerna bootstrap",
+    "setup-tests": "./bin/test-setup.sh",
+    "start": "node ./bin/pouchdb-server",
+    "test-pouchdb": "npm run setup-tests && ./bin/test-pouchdb.sh",
+    "test-couchdb": "./bin/test-couchdb.sh",
+    "eslint": "eslint bin/ packages/**/",
+    "test-pouchdb-minimum": "npm run setup-tests && ./bin/test-pouchdb-minimum.sh",
+    "test": "npm run test-pouchdb-minimum && npm run test-pouchdb",
+    "unit-tests": "./bin/unit-tests.js"
+  },
+  "dependencies": {
+    "eslint": "^3.0.1",
+    "lerna": "2.0.0-beta.23"
+  },
+  "devDependencies": {
+    "couchdb-harness": "^0.1.6"
+  }
+}

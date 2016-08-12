@@ -1,0 +1,10 @@
+repositories {
+    mavenLocal()
+    maven {
+        url  "https://bintray.com/artifact/download/thali/Thali"
+    }
+}
+
+dependencies {
+    compile(group: 'org.thaliproject.p2p.btconnectorlib', name: 'btconnectorlib2', version: btconnectorlib2Version, ext: 'aar')
+}
