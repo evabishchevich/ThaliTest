@@ -4,6 +4,7 @@
 package io.jxcore.node;
 
 import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -49,7 +50,7 @@ class StreamCopyingThread extends Thread {
     private final String mThreadName;
     private int mBufferSize = DEFAULT_BUFFER_SIZE;
     private boolean mNotifyStreamCopyingProgress = false;
-    private boolean mIsInputStreamDone = false;
+    private volatile boolean mIsInputStreamDone = false;
     private boolean mDoStop = false;
     private boolean mIsClosed = false;
 
@@ -102,7 +103,7 @@ class StreamCopyingThread extends Thread {
 
     /**
      * From Thread.
-     *
+     * <p/>
      * Keeps on copying the content of the input stream to the output stream.
      */
     @Override
@@ -135,6 +136,7 @@ class StreamCopyingThread extends Thread {
                 totalNumberOfBytesWritten += numberOfBytesRead;
 
                 if (mNotifyStreamCopyingProgress) {
+                    Log.e(TAG, "onStreamCopySucceeded (thread ID: " + getId() + ", thread name: " + mThreadName + ")");
                     mListener.onStreamCopySucceeded(this, numberOfBytesRead);
                 }
             }
@@ -158,6 +160,18 @@ class StreamCopyingThread extends Thread {
         if (numberOfBytesRead == -1 && !mDoStop) {
             Log.d(TAG, "The end of the input stream has been reached (thread ID: "
                     + getId() + ", thread name: " + mThreadName + ")");
+            try {
+                mOutputStream.flush();
+                mOutputStream.close();
+                Log.e(TAG, " mOutputStream closed");
+            } catch (IOException e) {
+                String errorMessage = "Failed to close output stream";
+                Log.e(TAG, errorMessage + " (thread ID: " + getId() + ", thread name: "
+                        + mThreadName + "): " + e.getMessage());
+                errorMessage += ": " + e.getMessage();
+                mListener.onStreamCopyError(this, errorMessage);
+            }
+
             mIsInputStreamDone = true;
         }
 
