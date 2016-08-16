@@ -185,8 +185,8 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
                 mListener.onDone(socketThreadBase, (who == mSendingThread));
             }
         }, 1000);*/
-
-        if (mReceivingThread.getIsDone() && mSendingThread.getIsDone()) {
+        if (mReceivingThread != null && mReceivingThread.getIsDone()
+                && mSendingThread != null && mSendingThread.getIsDone()) {
             Log.i(mTag, "Both threads are done, notifying the listener...");
             mListener.onDone(socketThreadBase, (who == mSendingThread));
         }

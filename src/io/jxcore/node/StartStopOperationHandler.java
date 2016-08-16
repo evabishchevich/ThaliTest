@@ -143,9 +143,15 @@ public class StartStopOperationHandler {
                     return;
                 }
 
+                boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
+                if (shouldStartOrStopListeningToAdvertisementsOnly){
+                    adv = mDiscoveryManager.isAdvertising();
+
+                }
+
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,
-                        !shouldStartOrStopListeningToAdvertisementsOnly)) {
+                        adv)) {
                     final String errorMessage = "Failed to start the discovery manager";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
