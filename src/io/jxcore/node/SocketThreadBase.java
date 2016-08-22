@@ -4,8 +4,11 @@
 package io.jxcore.node;
 
 import android.bluetooth.BluetoothSocket;
+import android.nfc.Tag;
 import android.util.Log;
+
 import org.thaliproject.p2p.btconnectorlib.PeerProperties;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,7 +26,7 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
         /**
          * Called when either the sending or the receiving thread is done.
          *
-         * @param who The associated SocketThreadBase instance (this).
+         * @param who                  The associated SocketThreadBase instance (this).
          * @param threadDoneWasSending If true, the sending thread is done. If false, the receiving thread is done.
          */
         void onDone(SocketThreadBase who, boolean threadDoneWasSending);
@@ -74,6 +77,9 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
         mBluetoothInputStream = inputStream;
         mBluetoothOutputStream = outputStream;
         mListener = listener;
+        if (bluetoothSocket != null) {
+            Log.d(mTag, "Bluetooth socket : " + bluetoothSocket.toString());
+        }
         mBluetoothSocket = bluetoothSocket;
     }
 
@@ -164,7 +170,6 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
     }
 
     /**
-     *
      * @param who The StreamCopyingThread that is done.
      */
     @Override
@@ -175,6 +180,7 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
             Log.i(mTag, "The sending thread is done");
         } else {
             Log.i(mTag, "Unidentified stream copying thread done");
+//            return;
         }
 
         final SocketThreadBase socketThreadBase = this;

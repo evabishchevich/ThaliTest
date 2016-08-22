@@ -635,30 +635,29 @@ test('test to coordinate connection cut', function (t) {
   });
 });
 
-//test('can do HTTP requests after connections are cut', function (t) {
-//  // Turn Bluetooth back on so that Android can operate
-//  // (iOS does not require separate call to operate since
-//  // killConnections is more like a single-shot thing).
-//
-//  if (jxcore.utils.OSInfo().isAndroid) {
-//    var networkChangeHandler = function(networkChangedValue) {
-//      t.pass('Delete me - we got a network changed value ' + networkChangedValue);
-//      if (networkChangedValue.bluetoothLowEnergy &&
-//          networkChangedValue.bluetooth) {
-//        thaliMobileNativeWrapper.emitter.removeListener('networkChangedNonTCP',
-//         networkChangeHandler);
-//        endToEndWithStateCheck(t);
-//      }
-//    };
-//    thaliMobileNativeWrapper.emitter.on('networkChangedNonTCP',
-//      networkChangeHandler);
-//
-//    t.pass('Turning bluetooth on');
-//    testUtils.toggleBluetooth(true);
-//  } else {
-//    endToEndWithStateCheck(t);
-//  }
-//});
+test('can do HTTP requests after connections are cut', function (t) {
+  // Turn Bluetooth back on so that Android can operate
+  // (iOS does not require separate call to operate since
+  // killConnections is more like a single-shot thing).
+
+  if (jxcore.utils.OSInfo().isAndroid) {
+    var networkChangeHandler = function(networkChangedValue) {
+      if (networkChangedValue.bluetoothLowEnergy &&
+          networkChangedValue.bluetooth) {
+        thaliMobileNativeWrapper.emitter.removeListener('networkChangedNonTCP',
+         networkChangeHandler);
+        endToEndWithStateCheck(t);
+      }
+    };
+    thaliMobileNativeWrapper.emitter.on('networkChangedNonTCP',
+      networkChangeHandler);
+
+    t.pass('Turning bluetooth on');
+    testUtils.toggleBluetooth(true);
+  } else {
+    endToEndWithStateCheck(t);
+  }
+});
 
 test('will fail bad PSK connection between peers', function (t) {
   //trivialBadEndtoEndTest(t, true);
@@ -667,65 +666,65 @@ test('will fail bad PSK connection between peers', function (t) {
   t.end();
 });
 
-//test('We provide notification when a listener dies and we recreate it',
-//  function (t) {
-//    var recreatedPort = null;
-//    trivialEndToEndTest(t, false, function (peerId) {
-//      function recreatedHandler(record) {
-//        t.equal(record.peerIdentifier, peerId, 'same ids');
-//        recreatedPort = record.portNumber;
-//      }
-//
-//      thaliMobileNativeWrapper._getServersManager()
-//        .on('listenerRecreatedAfterFailure', recreatedHandler);
-//
-//      function exit() {
-//        thaliMobileNativeWrapper._getServersManager()
-//          .removeListener('listenerRecreatedAfterFailure', recreatedHandler);
-//        thaliMobileNativeWrapper.emitter
-//          .removeListener('nonTCPPeerAvailabilityChangedEvent',
-//            nonTCPAvailableHandler);
-//        t.end();
-//      }
-//
-//      function nonTCPAvailableHandler(record) {
-//        // TODO:
-//        // There is a race condition when this test is ran on Android:
-//        // This function is called just before recreatedHandler leading
-//        // to recreatedPort being null.
-//        // Re-enable the check below once #719 is fixed.
-//        // Note that due to other changes we also need to add in a test to
-//        // make sure we are looking at an event for the right peerID
-//        /*if (!recreatedPort ||
-//          recreatedPort && record.portNumber !== recreatedPort) {
-//          logger.debug('No recreated port or port numbers do not match: '
-//            + record.portNumber + ' !== ' + recreatedPort);
-//          return;
-//        }*/
-//      }
-//
-//      testUtils.getSamePeerWithRetry(testPath, pskIdentity, pskKey, peerId)
-//        .then(function (response) {
-//          t.equal(response.httpResponseBody, testData,
-//            'recreate - response body should match testData');
-//          exit();
-//        })
-//        .catch(function (error) {
-//          t.fail('fail in recreate test - ' + error);
-//          exit();
-//        });
-//
-//      thaliMobileNativeWrapper.emitter.on('nonTCPPeerAvailabilityChangedEvent',
-//        nonTCPAvailableHandler);
-//
-//      t.pass('About to destroy connection to peer');
-//
-//      try {
-//        thaliMobileNativeWrapper._getServersManager().
-//          _peerServers[peerId].server._mux.destroy();
-//      } catch (err) {
-//        t.fail('destroy failed with - ' + err);
-//        exit();
-//      }
-//    });
-//  });
+test('We provide notification when a listener dies and we recreate it',
+  function (t) {
+    var recreatedPort = null;
+    trivialEndToEndTest(t, false, function (peerId) {
+      function recreatedHandler(record) {
+        t.equal(record.peerIdentifier, peerId, 'same ids');
+        recreatedPort = record.portNumber;
+      }
+
+      thaliMobileNativeWrapper._getServersManager()
+        .on('listenerRecreatedAfterFailure', recreatedHandler);
+
+      function exit() {
+        thaliMobileNativeWrapper._getServersManager()
+          .removeListener('listenerRecreatedAfterFailure', recreatedHandler);
+        thaliMobileNativeWrapper.emitter
+          .removeListener('nonTCPPeerAvailabilityChangedEvent',
+            nonTCPAvailableHandler);
+        t.end();
+      }
+
+      function nonTCPAvailableHandler(record) {
+        // TODO:
+        // There is a race condition when this test is ran on Android:
+        // This function is called just before recreatedHandler leading
+        // to recreatedPort being null.
+        // Re-enable the check below once #719 is fixed.
+        // Note that due to other changes we also need to add in a test to
+        // make sure we are looking at an event for the right peerID
+        /*if (!recreatedPort ||
+          recreatedPort && record.portNumber !== recreatedPort) {
+          logger.debug('No recreated port or port numbers do not match: '
+            + record.portNumber + ' !== ' + recreatedPort);
+          return;
+        }*/
+      }
+
+      testUtils.getSamePeerWithRetry(testPath, pskIdentity, pskKey, peerId)
+        .then(function (response) {
+          t.equal(response.httpResponseBody, testData,
+            'recreate - response body should match testData');
+          exit();
+        })
+        .catch(function (error) {
+          t.fail('fail in recreate test - ' + error);
+          exit();
+        });
+
+      thaliMobileNativeWrapper.emitter.on('nonTCPPeerAvailabilityChangedEvent',
+        nonTCPAvailableHandler);
+
+      t.pass('About to destroy connection to peer');
+
+      try {
+        thaliMobileNativeWrapper._getServersManager().
+          _peerServers[peerId].server._mux.destroy();
+      } catch (err) {
+        t.fail('destroy failed with - ' + err);
+        exit();
+      }
+    });
+  });

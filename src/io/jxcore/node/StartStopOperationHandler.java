@@ -144,10 +144,10 @@ public class StartStopOperationHandler {
                 }
 
                 boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
-                if (shouldStartOrStopListeningToAdvertisementsOnly){
-                    adv = mDiscoveryManager.isAdvertising();
-
-                }
+//                if (shouldStartOrStopListeningToAdvertisementsOnly){
+//                    adv = mDiscoveryManager.isAdvertising();
+//
+//                }
 
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,
@@ -224,7 +224,7 @@ public class StartStopOperationHandler {
         DiscoveryManagerSettings discoveryManagerSettings = DiscoveryManagerSettings.getInstance(null);
         int extraInformation = discoveryManagerSettings.getBeaconAdExtraInformation() + 1;
         if (extraInformation > 255) {
-            extraInformation = 0;
+            extraInformation = 1;
         }
         Log.i(TAG, "updateBeaconAdExtraInformation: New value: " + extraInformation);
         discoveryManagerSettings.setBeaconAdExtraInformation(extraInformation);
