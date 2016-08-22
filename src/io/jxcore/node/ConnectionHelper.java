@@ -9,15 +9,20 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.os.Looper;
 import android.util.Log;
+
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager;
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager.ConnectionManagerState;
 import org.thaliproject.p2p.btconnectorlib.ConnectionManagerSettings;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManagerSettings;
 import org.thaliproject.p2p.btconnectorlib.PeerProperties;
+
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.RunnableFuture;
+import java.util.logging.Handler;
 
 /**
  * Wraps the Android connector library functionality and provides an interface for JXcore layer
@@ -25,8 +30,8 @@ import java.util.UUID;
  */
 public class ConnectionHelper
         implements
-            ConnectionManager.ConnectionManagerListener,
-            DiscoveryManager.DiscoveryManagerListener {
+        ConnectionManager.ConnectionManagerListener,
+        DiscoveryManager.DiscoveryManagerListener {
     private static final String TAG = ConnectionHelper.class.getName();
 
     public static final int NO_PORT_NUMBER = 0;
@@ -156,13 +161,13 @@ public class ConnectionHelper
      *
      * @param stopOnlyListeningForAdvertisements If true, will only stop listening for advertisements.
      *                                           If false, will stop everything.
-     * @param callback The callback to call when we get the (stop) operation result.
+     * @param callback                           The callback to call when we get the (stop) operation result.
      */
     public synchronized void stop(boolean stopOnlyListeningForAdvertisements, JXcoreThaliCallback callback) {
         Log.i(TAG, "stop: "
                 + (stopOnlyListeningForAdvertisements
-                    ? "Stopping only listening for advertisements"
-                    : "Stopping all activities and killing connections"));
+                ? "Stopping only listening for advertisements"
+                : "Stopping all activities and killing connections"));
 
         if (!stopOnlyListeningForAdvertisements) {
             killConnections(false);
@@ -431,6 +436,7 @@ public class ConnectionHelper
     public void onConnectionFailed(PeerProperties peerProperties, String errorMessage) {
         Log.e(TAG, "onConnectionFailed: Peer properties: " + peerProperties + ", error message: " + errorMessage);
 
+        //TODO add notification here even if properties are null
         if (peerProperties != null) {
             handleOutgoingConnectionFailure(peerProperties, errorMessage);
             toggleBetweenSystemDecidedAndAlternativeInsecureRfcommPortNumber();
@@ -499,10 +505,10 @@ public class ConnectionHelper
      */
     @Override
     public void onPeerDiscovered(PeerProperties peerProperties) {
-        Log.i(TAG, "onPeerDiscovered: " + peerProperties.toString()
-                + ", Bluetooth address: " + peerProperties.getBluetoothMacAddress()
-                + ", device name: '" + peerProperties.getDeviceName()
-                + "', device address: '" + peerProperties.getDeviceAddress() + "'");
+//        Log.d(TAG, "onPeerDiscovered: " + peerProperties.toString()
+//                + ", Bluetooth address: " + peerProperties.getBluetoothMacAddress()
+//                + ", device name: '" + peerProperties.getDeviceName()
+//                + "', device address: '" + peerProperties.getDeviceAddress() + "'");
 
         JXcoreExtension.notifyPeerAvailabilityChanged(peerProperties, true);
     }
@@ -514,9 +520,9 @@ public class ConnectionHelper
      */
     @Override
     public void onPeerUpdated(PeerProperties peerProperties) {
-        Log.i(TAG, "onPeerUpdated: " + peerProperties.toString()
-                + ", device name: '" + peerProperties.getDeviceName()
-                + "', device address: '" + peerProperties.getDeviceAddress() + "'");
+//        Log.d(TAG, "onPeerUpdated: " + peerProperties.toString()
+//                + ", device name: '" + peerProperties.getDeviceName()
+//                + "', device address: '" + peerProperties.getDeviceAddress() + "'");
 
         JXcoreExtension.notifyPeerAvailabilityChanged(peerProperties, true);
     }
@@ -528,7 +534,7 @@ public class ConnectionHelper
      */
     @Override
     public void onPeerLost(PeerProperties peerProperties) {
-        Log.i(TAG, "onPeerLost: " + peerProperties.toString());
+        Log.d(TAG, "onPeerLost: " + peerProperties.toString());
 
         if (mConnectionModel.hasConnection(peerProperties.getId())) {
             // If we are still connected, the peer can't certainly be lost, add it back
@@ -567,6 +573,7 @@ public class ConnectionHelper
         final String finalPeerId = peerProperties.getId();
         final JXcoreThaliCallback callback = mConnectionModel.getOutgoingConnectionCallbackByBluetoothMacAddress(finalPeerId);
 
+        final android.os.Handler handler = new android.os.Handler(Looper.getMainLooper());
         try {
             newOutgoingSocketThread = new OutgoingSocketThread(bluetoothSocket, new SocketThreadBase.Listener() {
                 @Override
@@ -599,7 +606,16 @@ public class ConnectionHelper
                             + who.getPeerProperties().toString() + " done, closing connection...");
 
                     final String peerId = who.getPeerProperties().getId();
-                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+
+//                    handler.postDelayed(new Runnable(){
+//                        @Override
+//                        public void run() {
+                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+//                        }
+//
+//
+//                    }, 500L);
+//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
                 }
 
                 @Override
@@ -609,7 +625,16 @@ public class ConnectionHelper
                             + " disconnected: " + errorMessage);
 
                     final String peerId = who.getPeerProperties().getId();
-                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+
+//                    handler.postDelayed(new Runnable(){
+//                        @Override
+//                        public void run() {
+                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+//                        }
+
+
+//                    }, 500L);
+//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
                 }
             });
         } catch (IOException e) {
@@ -665,6 +690,8 @@ public class ConnectionHelper
      */
     private void handleIncomingConnection(BluetoothSocket bluetoothSocket, PeerProperties peerProperties) {
         IncomingSocketThread newIncomingSocketThread = null;
+
+
 
         try {
             newIncomingSocketThread = new IncomingSocketThread(bluetoothSocket, new SocketThreadBase.Listener() {
@@ -740,7 +767,7 @@ public class ConnectionHelper
      * Notifies the JXcore layer about the connection failure.
      *
      * @param peerProperties The properties of the peer we were trying to connect to.
-     * @param errorMessage The error message.
+     * @param errorMessage   The error message.
      */
     private synchronized void handleOutgoingConnectionFailure(PeerProperties peerProperties, String errorMessage) {
         final String bluetoothMacAddress = peerProperties.getBluetoothMacAddress();
@@ -759,12 +786,12 @@ public class ConnectionHelper
     /**
      * Lowers the BLE discovery power settings. If the power settings are already changed, the
      * timer for resetting the settings is restarted.
-     *
+     * <p>
      * This method should be called when a data transfer is started to ensure a reasonable data
      * transfer speed as using BLE for discovery will likely interfere with the data transfer done
      * utilizing Bluetooth sockets because in most modern phones the Bluetooth and BLE stacks
      * share the same 2.4 GHz antenna (along with WiFi).
-     *
+     * <p>
      * Note that changing the power settings in the fly may disturb ongoing connection attempts
      * (and incoming connections) causing connection failures.
      */

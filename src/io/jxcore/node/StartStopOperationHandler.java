@@ -5,11 +5,9 @@ package io.jxcore.node;
 
 import android.os.CountDownTimer;
 import android.util.Log;
-
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManagerSettings;
-
 import java.util.Date;
 
 /**
@@ -17,7 +15,7 @@ import java.util.Date;
  */
 public class StartStopOperationHandler {
     private static final String TAG = StartStopOperationHandler.class.getName();
-    private static final long OPERATION_TIMEOUT_IN_MILLISECONDS = 10000;
+    private static final long OPERATION_TIMEOUT_IN_MILLISECONDS = 3000;
     private final ConnectionManager mConnectionManager;
     private final DiscoveryManager mDiscoveryManager;
     private CountDownTimer mOperationTimeoutTimer = null;
@@ -27,7 +25,7 @@ public class StartStopOperationHandler {
      * Constructor.
      *
      * @param connectionManager The connection manager.
-     * @param discoveryManager  The discovery manager.
+     * @param discoveryManager The discovery manager.
      */
     public StartStopOperationHandler(ConnectionManager connectionManager, DiscoveryManager discoveryManager) {
         mConnectionManager = connectionManager;
@@ -52,7 +50,7 @@ public class StartStopOperationHandler {
      *
      * @param startAdvertising If true, will start advertising. If false, will only start listening
      *                         for advertisements.
-     * @param callback         The callback to call when we get the operation result.
+     * @param callback The callback to call when we get the operation result.
      */
     public synchronized void executeStartOperation(boolean startAdvertising, JXcoreThaliCallback callback) {
         if (mCurrentOperation != null) {
@@ -69,7 +67,7 @@ public class StartStopOperationHandler {
      *
      * @param stopOnlyListeningForAdvertisements If true, will only stop listening for advertisements.
      *                                           If false, will stop everything.
-     * @param callback                           The callback to call when we get the operation result.
+     * @param callback The callback to call when we get the operation result.
      */
     public synchronized void executeStopOperation(
             boolean stopOnlyListeningForAdvertisements, JXcoreThaliCallback callback) {
@@ -144,14 +142,16 @@ public class StartStopOperationHandler {
                     mCurrentOperation = null;
                     return;
                 }
-                boolean shouldAdvertise = !shouldStartOrStopListeningToAdvertisementsOnly;
 
-                if (shouldStartOrStopListeningToAdvertisementsOnly) {
-                    shouldAdvertise = mDiscoveryManager.isAdvertising();
-                }
+                boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
+//                if (shouldStartOrStopListeningToAdvertisementsOnly){
+//                    adv = mDiscoveryManager.isAdvertising();
+//
+//                }
+
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,
-                        shouldAdvertise)) {
+                        adv)) {
                     final String errorMessage = "Failed to start the discovery manager";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
@@ -191,7 +191,6 @@ public class StartStopOperationHandler {
                     if (mCurrentOperation != null) {
                         String errorMessage = "Operation timeout, state error: " + isTargetState(mCurrentOperation);
                         Log.d(TAG, errorMessage);
-                        Log.e(TAG, "current op = " + mCurrentOperation.toString());
                         mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
                         mCurrentOperation = null;
                         mOperationTimeoutTimer = null;

@@ -4,8 +4,11 @@
 package io.jxcore.node;
 
 import android.bluetooth.BluetoothSocket;
+import android.nfc.Tag;
 import android.util.Log;
+
 import org.thaliproject.p2p.btconnectorlib.PeerProperties;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,7 +26,7 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
         /**
          * Called when either the sending or the receiving thread is done.
          *
-         * @param who The associated SocketThreadBase instance (this).
+         * @param who                  The associated SocketThreadBase instance (this).
          * @param threadDoneWasSending If true, the sending thread is done. If false, the receiving thread is done.
          */
         void onDone(SocketThreadBase who, boolean threadDoneWasSending);
@@ -164,7 +167,6 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
     }
 
     /**
-     *
      * @param who The StreamCopyingThread that is done.
      */
     @Override
@@ -175,20 +177,19 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
             Log.i(mTag, "The sending thread is done");
         } else {
             Log.i(mTag, "Unidentified stream copying thread done");
+//            return;
         }
 
         final SocketThreadBase socketThreadBase = this;
 
-//        jxcore.coreThread.handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                mListener.onDone(socketThreadBase, (who == mSendingThread));
-//            }
-//        }, 1000);
-
-        Log.e(mTag, "Receiving thread is done  = " + mReceivingThread.getIsDone());
-        Log.e(mTag, "Sending thread is done  = " + mSendingThread.getIsDone());
-        if (mReceivingThread.getIsDone() && mSendingThread.getIsDone()) {
+        /*jxcore.coreThread.handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onDone(socketThreadBase, (who == mSendingThread));
+            }
+        }, 1000);*/
+        if (mReceivingThread != null && mReceivingThread.getIsDone()
+                && mSendingThread != null && mSendingThread.getIsDone()) {
             Log.i(mTag, "Both threads are done, notifying the listener...");
             mListener.onDone(socketThreadBase, (who == mSendingThread));
         }
