@@ -575,68 +575,69 @@ public class ConnectionHelper
 
         final android.os.Handler handler = new android.os.Handler(Looper.getMainLooper());
         try {
-            newOutgoingSocketThread = new OutgoingSocketThread(bluetoothSocket, new SocketThreadBase.Listener() {
-                @Override
-                public void onListeningForIncomingConnections(int portNumber) {
-                    Log.i(TAG, "onListeningForIncomingConnections: Outgoing connection is using port "
-                            + portNumber + " (peer ID: " + finalPeerId + ")");
-
-                    if (callback != null) {
-                        callback.getListenerOrIncomingConnection().setListeningOnPortNumber(portNumber);
-                        callback.callOnConnectCallback(null, callback.getListenerOrIncomingConnection());
-                    }
-
-                    // Remove the callback since it's no longer needed
-                    mConnectionModel.removeOutgoingConnectionCallback(finalPeerId);
-                }
-
-                @Override
-                public void onDataTransferred(int numberOfBytes) {
-                    jxcore.activity.runOnUiThread(new Runnable() {
+            newOutgoingSocketThread = new OutgoingSocketThread(bluetoothSocket, new ConnectionData(peerProperties, false),
+                    new SocketThreadBase.Listener() {
                         @Override
-                        public void run() {
-                            lowerBleDiscoveryPowerAndStartResetTimer();
+                        public void onListeningForIncomingConnections(int portNumber) {
+                            Log.i(TAG, "onListeningForIncomingConnections: Outgoing connection is using port "
+                                    + portNumber + " (peer ID: " + finalPeerId + ")");
+
+                            if (callback != null) {
+                                callback.getListenerOrIncomingConnection().setListeningOnPortNumber(portNumber);
+                                callback.callOnConnectCallback(null, callback.getListenerOrIncomingConnection());
+                            }
+
+                            // Remove the callback since it's no longer needed
+                            mConnectionModel.removeOutgoingConnectionCallback(finalPeerId);
+                        }
+
+                        @Override
+                        public void onDataTransferred(int numberOfBytes) {
+                            jxcore.activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    lowerBleDiscoveryPowerAndStartResetTimer();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onDone(SocketThreadBase who, boolean threadDoneWasSending) {
+                            Log.i(TAG, "onDone: Outgoing connection, peer "
+                                    + who.getPeerProperties().toString() + " done, closing connection...");
+
+                            final String peerId = who.getPeerProperties().getId();
+
+//                    handler.postDelayed(new Runnable(){
+//                        @Override
+//                        public void run() {
+                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+//                        }
+//
+//
+//                    }, 500L);
+//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+                        }
+
+                        @Override
+                        public void onDisconnected(SocketThreadBase who, String errorMessage) {
+                            Log.w(TAG, "onDisconnected: Outgoing connection, peer "
+                                    + who.getPeerProperties().toString()
+                                    + " disconnected: " + errorMessage);
+
+                            final String peerId = who.getPeerProperties().getId();
+
+//                    handler.postDelayed(new Runnable(){
+//                        @Override
+//                        public void run() {
+                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+//                        }
+
+
+//                    }, 500L);
+//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
                         }
                     });
-                }
-
-                @Override
-                public void onDone(SocketThreadBase who, boolean threadDoneWasSending) {
-                    Log.i(TAG, "onDone: Outgoing connection, peer "
-                            + who.getPeerProperties().toString() + " done, closing connection...");
-
-                    final String peerId = who.getPeerProperties().getId();
-
-//                    handler.postDelayed(new Runnable(){
-//                        @Override
-//                        public void run() {
-                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
-//                        }
-//
-//
-//                    }, 500L);
-//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
-                }
-
-                @Override
-                public void onDisconnected(SocketThreadBase who, String errorMessage) {
-                    Log.w(TAG, "onDisconnected: Outgoing connection, peer "
-                            + who.getPeerProperties().toString()
-                            + " disconnected: " + errorMessage);
-
-                    final String peerId = who.getPeerProperties().getId();
-
-//                    handler.postDelayed(new Runnable(){
-//                        @Override
-//                        public void run() {
-                            mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
-//                        }
-
-
-//                    }, 500L);
-//                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
-                }
-            });
         } catch (IOException e) {
             Log.e(TAG, "handleOutgoingConnection: Failed to create an outgoing connection thread instance: " + e.getMessage(), e);
 
@@ -692,43 +693,43 @@ public class ConnectionHelper
         IncomingSocketThread newIncomingSocketThread = null;
 
 
-
         try {
-            newIncomingSocketThread = new IncomingSocketThread(bluetoothSocket, new SocketThreadBase.Listener() {
-                @Override
-                public void onListeningForIncomingConnections(int portNumber) {
-                    // Not applicable for incoming connections
-                }
-
-                @Override
-                public void onDataTransferred(int numberOfBytes) {
-                    jxcore.activity.runOnUiThread(new Runnable() {
+            newIncomingSocketThread = new IncomingSocketThread(bluetoothSocket, new ConnectionData(peerProperties, true),
+                    new SocketThreadBase.Listener() {
                         @Override
-                        public void run() {
-                            lowerBleDiscoveryPowerAndStartResetTimer();
+                        public void onListeningForIncomingConnections(int portNumber) {
+                            // Not applicable for incoming connections
+                        }
+
+                        @Override
+                        public void onDataTransferred(int numberOfBytes) {
+                            jxcore.activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    lowerBleDiscoveryPowerAndStartResetTimer();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onDone(SocketThreadBase who, boolean threadDoneWasSending) {
+                            Log.i(TAG, "onDone: Incoming connection, peer "
+                                    + who.getPeerProperties().toString() + " done, closing connection...");
+
+                            final IncomingSocketThread incomingSocketThread = (IncomingSocketThread) who;
+                            mConnectionModel.closeAndRemoveIncomingConnectionThread(incomingSocketThread.getId());
+                        }
+
+                        @Override
+                        public void onDisconnected(SocketThreadBase who, String errorMessage) {
+                            Log.w(TAG, "onDisconnected: Incoming connection, peer "
+                                    + who.getPeerProperties().toString()
+                                    + " disconnected: " + errorMessage);
+
+                            final IncomingSocketThread incomingSocketThread = (IncomingSocketThread) who;
+                            mConnectionModel.closeAndRemoveIncomingConnectionThread(incomingSocketThread.getId());
                         }
                     });
-                }
-
-                @Override
-                public void onDone(SocketThreadBase who, boolean threadDoneWasSending) {
-                    Log.i(TAG, "onDone: Incoming connection, peer "
-                            + who.getPeerProperties().toString() + " done, closing connection...");
-
-                    final IncomingSocketThread incomingSocketThread = (IncomingSocketThread) who;
-                    mConnectionModel.closeAndRemoveIncomingConnectionThread(incomingSocketThread.getId());
-                }
-
-                @Override
-                public void onDisconnected(SocketThreadBase who, String errorMessage) {
-                    Log.w(TAG, "onDisconnected: Incoming connection, peer "
-                            + who.getPeerProperties().toString()
-                            + " disconnected: " + errorMessage);
-
-                    final IncomingSocketThread incomingSocketThread = (IncomingSocketThread) who;
-                    mConnectionModel.closeAndRemoveIncomingConnectionThread(incomingSocketThread.getId());
-                }
-            });
         } catch (IOException e) {
             Log.e(TAG, "handleIncomingConnection: Failed to create an incoming connection thread instance: " + e.getMessage(), e);
 

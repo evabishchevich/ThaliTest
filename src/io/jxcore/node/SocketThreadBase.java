@@ -230,13 +230,13 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
     @Override
     public void onStreamCopySucceeded(StreamCopyingThread who, int numberOfBytes) {
         // Uncomment the following to debug chunks of data transferred
-        if (who == mReceivingThread) {
-            Log.d(mTag, "The receiving thread succeeded to read/write " + numberOfBytes + " bytes");
-        } else if (who == mSendingThread) {
-            Log.d(mTag, "The sending thread succeeded to read/write " + numberOfBytes + " bytes");
-        } else {
-            Log.w(mTag, "An unidentified stream copying thread succeeded to read/write " + numberOfBytes + " bytes");
-        }
+//        if (who == mReceivingThread) {
+//            Log.d(mTag, "The receiving thread succeeded to read/write " + numberOfBytes + " bytes");
+//        } else if (who == mSendingThread) {
+//            Log.d(mTag, "The sending thread succeeded to read/write " + numberOfBytes + " bytes");
+//        } else {
+//            Log.w(mTag, "An unidentified stream copying thread succeeded to read/write " + numberOfBytes + " bytes");
+//        }
 
         mListener.onDataTransferred(numberOfBytes);
     }
@@ -244,7 +244,7 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
     /**
      * Creates the stream copying threads (one for sending and one for receiving) and starts them.
      */
-    protected synchronized void startStreamCopyingThreads() {
+    protected synchronized void startStreamCopyingThreads(ConnectionData connectionData) {
         if (mBluetoothInputStream == null
                 || mLocalInputStream == null
                 || mBluetoothOutputStream == null
@@ -262,13 +262,13 @@ abstract class SocketThreadBase extends Thread implements StreamCopyingThread.Li
                 shortName = mTag;
             }
 
-            mSendingThread = new StreamCopyingThread(this, mLocalInputStream, mBluetoothOutputStream, shortName + "/" + SENDING_THREAD_NAME);
+            mSendingThread = new StreamCopyingThread(this, mLocalInputStream, mBluetoothOutputStream, shortName + "/" + SENDING_THREAD_NAME, connectionData);
             mSendingThread.setUncaughtExceptionHandler(this.getUncaughtExceptionHandler());
             mSendingThread.setBufferSize(STREAM_COPYING_THREAD_BUFFER_SIZE);
             mSendingThread.setNotifyStreamCopyingProgress(true);
             mSendingThread.start();
 
-            mReceivingThread = new StreamCopyingThread(this, mBluetoothInputStream, mLocalOutputStream, shortName + "/" + RECEIVING_THREAD_NAME);
+            mReceivingThread = new StreamCopyingThread(this, mBluetoothInputStream, mLocalOutputStream, shortName + "/" + RECEIVING_THREAD_NAME, connectionData);
             mReceivingThread.setUncaughtExceptionHandler(this.getUncaughtExceptionHandler());
             mReceivingThread.setBufferSize(STREAM_COPYING_THREAD_BUFFER_SIZE);
             mReceivingThread.setNotifyStreamCopyingProgress(true);

@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.thaliproject.p2p.btconnectorlib.PeerProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,7 +47,7 @@ public class StreamCopyingThreadTest {
         mOutputStream = new StreamCopyingThreadOutputStream();
 
         mStreamCopyingThread = new StreamCopyingThread(mListener, mInputStream, mOutputStream,
-                mThreadName);
+                mThreadName, new ConnectionData(new PeerProperties(), false));
     }
 
     @Test

@@ -55,6 +55,8 @@ class StreamCopyingThread extends Thread {
     private boolean mDoStop = false;
     private boolean mIsClosed = false;
 
+    private ConnectionData connectionData;
+
     /**
      * Constructor. Note that the responsibility to close the given streams is that of the caller
      * i.e. this class will not take ownership.
@@ -67,11 +69,13 @@ class StreamCopyingThread extends Thread {
     public StreamCopyingThread(
             Listener listener,
             InputStream inputStream, OutputStream outputStream,
-            String threadName) {
+            String threadName,
+            ConnectionData connectionData) {
         mListener = listener;
         mInputStream = inputStream;
         mOutputStream = outputStream;
         mThreadName = threadName;
+        this.connectionData = connectionData;
     }
 
     public void setBufferSize(final int bufferSizeInBytes) {
@@ -109,7 +113,7 @@ class StreamCopyingThread extends Thread {
      */
     @Override
     public void run() {
-        Log.d(TAG, "Entering thread (ID: " + getId() + ", name: " + mThreadName + ")");
+        Log.d(TAG, "Entering thread (ID: " + getId() + ", name: " + mThreadName + "). Connection data: " + connectionData.toString());
         byte[] buffer = new byte[mBufferSize];
         int numberOfBytesRead = 0;
 
@@ -166,15 +170,18 @@ class StreamCopyingThread extends Thread {
                         + mThreadName + "): " + e.getMessage());
                 errorMessage += ": " + e.getMessage();
                 final String msg = errorMessage;
-                jxcore.coreThread.handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
+//                jxcore.coreThread.handler.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+                Log.d(TAG, "onStreamCopyError (ID: " + getId() + ", name: " + mThreadName
+                        + "). Connection data: "  + connectionData.toString() + " .During the lifetime of the thread the total number of bytes read was "
+                        + totalNumberOfBytesRead + " and the total number of bytes written "
+                        + totalNumberOfBytesWritten);
+                mListener.onStreamCopyError(StreamCopyingThread.this, msg);
 
-                        mListener.onStreamCopyError(StreamCopyingThread.this, msg);
 
-
-                    }
-                }, 1000L);
+//                    }
+//                }, 1000L);
 
 //                new CountDownTimer(1000, 1000){
 //
@@ -194,7 +201,7 @@ class StreamCopyingThread extends Thread {
 
         if (numberOfBytesRead == -1 && !mDoStop) {
             Log.d(TAG, "The end of the input stream has been reached (thread ID: "
-                    + getId() + ", thread name: " + mThreadName + ")");
+                    + getId() + ", thread name: " + mThreadName + "). Connection data: "  + connectionData.toString());
             closeOutputStream();
             mIsInputStreamDone = true;
         } else if (numberOfBytesRead == -1) {
@@ -209,36 +216,38 @@ class StreamCopyingThread extends Thread {
         }
 
         Log.d(TAG, "Exiting thread (ID: " + getId() + ", name: " + mThreadName
-                + "), during the lifetime of the thread the total number of bytes read was "
+                + "). Connection data: "  + connectionData.toString() + " .During the lifetime of the thread the total number of bytes read was "
                 + totalNumberOfBytesRead + " and the total number of bytes written "
                 + totalNumberOfBytesWritten);
     }
 
     private void closeOutputStream() {
-        Log.d(TAG, "closeOutputStream");
+        Log.d(TAG, "closeOutputStream. Connection data: "  + connectionData.toString());
         try {
+            Log.d(TAG, "closeOutputStream. Flushing");
             mOutputStream.flush();
         } catch (IOException e) {
             String errorMessage = "Failed to close output stream";
             Log.e(TAG, errorMessage + " (thread ID: " + getId() + ", thread name: "
                     + mThreadName + "): " + e.getMessage());
         }
-        jxcore.coreThread.handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
+//        jxcore.coreThread.handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+        try {
+            Log.d(TAG, "closeOutputStream. Closing");
+            mOutputStream.close();
+            Log.d(TAG, "closeOutputStream. Closed");
+        } catch (IOException e) {
+            String errorMessage = "Failed to close output stream";
+            Log.e(TAG, errorMessage + " (thread ID: " + getId() + ", thread name: "
+                    + mThreadName + "): " + e.getMessage());
+            errorMessage += ": " + e.getMessage();
+            mListener.onStreamCopyError(StreamCopyingThread.this, errorMessage);
+        }
 
-                    mOutputStream.close();
-                } catch (IOException e) {
-                    String errorMessage = "Failed to close output stream";
-                    Log.e(TAG, errorMessage + " (thread ID: " + getId() + ", thread name: "
-                            + mThreadName + "): " + e.getMessage());
-                    errorMessage += ": " + e.getMessage();
-                    mListener.onStreamCopyError(StreamCopyingThread.this, errorMessage);
-                }
-
-            }
-        }, 1000L);
+//            }
+//        }, 1000L);
 
 
     }
@@ -247,7 +256,7 @@ class StreamCopyingThread extends Thread {
      * Stops the thread and closes the streams, if not closed already.
      */
     public synchronized void close() {
-        Log.i(TAG, "close: Thread ID: " + getId());
+        Log.i(TAG, "close: Thread ID: " + getId() + ". Connection data: " + connectionData.toString());
         mDoStop = true;
 
         if (!mIsClosed) {
