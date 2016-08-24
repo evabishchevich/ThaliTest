@@ -144,10 +144,10 @@ public class StartStopOperationHandler {
                 }
 
                 boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
-//                if (shouldStartOrStopListeningToAdvertisementsOnly){
-//                    adv = mDiscoveryManager.isAdvertising();
-//
-//                }
+                if (shouldStartOrStopListeningToAdvertisementsOnly){
+                    adv = mDiscoveryManager.isAdvertising();
+
+                }
 
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,

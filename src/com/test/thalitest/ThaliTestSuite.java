@@ -14,7 +14,7 @@ import io.jxcore.node.StartStopOperationTest;
 import io.jxcore.node.StreamCopyingThreadTest;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ConnectionHelperTest.class,ConnectionModelTest.class,ConnectivityMonitorTest.class,IncomingSocketThreadTest.class,LifeCycleMonitorTest.class,ListenerOrIncomingConnectionTest.class,OutgoingSocketThreadTest.class,SocketThreadBaseTest.class,StartStopOperationHandlerTest.class,StartStopOperationTest.class,StreamCopyingThreadTest.class})
-
+//@Suite.SuiteClasses({ConnectionHelperTest.class,ConnectionModelTest.class,ConnectivityMonitorTest.class,IncomingSocketThreadTest.class,LifeCycleMonitorTest.class,ListenerOrIncomingConnectionTest.class,OutgoingSocketThreadTest.class,SocketThreadBaseTest.class,StartStopOperationHandlerTest.class,StartStopOperationTest.class,StreamCopyingThreadTest.class})
+@Suite.SuiteClasses({ ConnectionModelTest.class,ConnectivityMonitorTest.class})
 public class ThaliTestSuite {
 }

@@ -3,6 +3,7 @@ package io.jxcore.node;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.util.Log;
 
 import org.junit.After;
 import org.junit.Before;
@@ -143,6 +144,9 @@ public class ConnectionHelperTest {
 
     @Test
     public void testStart() throws Exception {
+
+        Log.e("!!!", "testStart");
+
         assertThat("Start method returns true",
                 mConnectionHelper.start(1111, false, mJXcoreThaliCallbackMock), is(equalTo(true)));
 
@@ -175,6 +179,7 @@ public class ConnectionHelperTest {
             assertThat("DiscoveryManager1 isRunning should return true",
                     mConnectionHelper.getDiscoveryManager().isRunning(), is(true));
         }
+        Log.e("!!!", "first is running");
 
         mConnectionHelper.stop(false, mJXcoreThaliCallbackMock);
         mConnectionHelper.dispose();
@@ -201,6 +206,8 @@ public class ConnectionHelperTest {
             assertThat("DiscoveryManager isRunning should return true",
                     mConnectionHelper.getDiscoveryManager().isRunning(), is(true));
         }
+
+        Log.e("!!!", "testStart finished");
     }
 
     @SuppressWarnings("unchecked")
