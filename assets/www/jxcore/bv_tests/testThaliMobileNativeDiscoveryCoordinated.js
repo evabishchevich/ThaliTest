@@ -114,6 +114,7 @@
 //
 //  var currentPeers = latestPeers = {};
 //  function newPeersHandler(peers) {
+//    logger.debug("new peers : " + JSON.stringify(peers));
 //    peers.forEach(function (peer) {
 //      if (peer.peerAvailable) {
 //        // We can receive each peer many times. We can just ignore this case.
@@ -141,6 +142,8 @@
 //  // After 10 seconds we will check whether we have all peers.
 //  setTimeout(function () {
 //    var peersReceived = Object.getOwnPropertyNames(currentPeers);
+//    logger.debug("peer received size = " + peersReceived.length + ", " + JSON.stringify(peersReceived));
+//    logger.debug("t.participants.length = " + t.participants.length);
 //    t.ok(
 //      peersReceived.length === t.participants.length - 1,
 //      'We have received peers we expected'
@@ -186,6 +189,8 @@
 //    // After 10 seconds we will check whether we have all peers.
 //    setTimeout(function () {
 //      var peersReceived = Object.getOwnPropertyNames(currentPeers);
+//      logger.debug("peer received size = " + peersReceived.length + ", " + JSON.stringify(peersReceived));
+//      logger.debug("t.participants.length = " + t.participants.length);
 //      t.ok(
 //        peersReceived.length === t.participants.length - 1,
 //        'We have received peers we expected'
@@ -228,6 +233,8 @@
 //    // from the latest peer discovery.
 //    setTimeout(function () {
 //      var peersReceived = Object.getOwnPropertyNames(currentPeers);
+//      logger.debug("peer received size = " + peersReceived.length + ", " + JSON.stringify(peersReceived));
+//      logger.debug("t.participants.length = " + t.participants.length);
 //      t.ok(
 //        peersReceived.length === t.participants.length - 1,
 //        'We have received peers we expected'
