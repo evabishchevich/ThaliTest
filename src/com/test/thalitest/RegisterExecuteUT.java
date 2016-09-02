@@ -45,7 +45,8 @@ public final class RegisterExecuteUT {
                 if (jsonObjectCreated) {
                     final String jsonObjectAsString = jsonObject.toString();
 
-                    jxcore.CallJSMethod(callbackId, jsonObjectAsString);
+//                    jxcore.CallJSMethod(callbackId, jsonObjectAsString);
+                    jxcore.CallJSMethod(callbackId, new JSONObject[] {jsonObject});
                 }
             }
         });

@@ -1,7 +1,9 @@
 package io.jxcore.node;
 
 import android.content.Context;
+import android.util.Log;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,11 +12,13 @@ import org.thaliproject.p2p.btconnectorlib.PeerProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +48,7 @@ public class StreamCopyingThreadTest {
 
         boutputStream = new ByteArrayOutputStream();
         mInputStream = new StreamCopyingThreadInputStream(mText);
-        mOutputStream = new StreamCopyingThreadOutputStream();
+        mOutputStream = new StreamCopyingThreadOutputStream(boutputStream);
 
         mStreamCopyingThread = new StreamCopyingThread(mListener, mInputStream, mOutputStream,
                 mThreadName, new ConnectionData(new PeerProperties(), false));
@@ -97,7 +101,86 @@ public class StreamCopyingThreadTest {
         notifications.size();
     }
 
+    @Test
+    public void testCopyBigData() throws InterruptedException {
+
+        byte[] data = new byte[20 * 1024 * 1024];
+        Arrays.fill(data, (byte) 19);
+        String threadName = "testCopyBigData thread";
+
+        ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+        InputStream inputStream = new StreamCopyingThreadInputStream(data);
+        OutputStream outputStream = new StreamCopyingThreadOutputStream(bOutputStream);
+
+        StreamCopyingThread streamCopyingThread = new StreamCopyingThread(mListener, inputStream, outputStream,
+                threadName, new ConnectionData(new PeerProperties(), false));
+
+        Thread runner = new Thread(streamCopyingThread);
+        runner.start();
+        runner.join();
+
+        assertThat("The content of the input stream is equal to the output stream",
+                bOutputStream.toByteArray(),
+                is(data));
+    }
+
+
+    @Test
+    public void testCopyDataAndCloseConnection() throws InterruptedException, IOException {
+        int dataSize = 20 * 1024 * 1024;
+        byte[] data = new byte[dataSize];
+        Arrays.fill(data, (byte) 19);
+        String threadName = "testCopyDataAndCloseConnection thread";
+
+        ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+        final InputStream inputStream = new StreamCopyingThreadInputStream(data);
+        OutputStream outputStream = new StreamCopyingThreadOutputStream(bOutputStream);
+        ListenerMock listenerMock = new ListenerMock(new OnHalfStreamCopiedListener() {
+            @Override
+            public void onHalfStreamCopied() {
+                try {
+                    Log.i("testCopyDataAndClose", "closing input stream");
+                    inputStream.close();
+                } catch (IOException e) {
+                    Assert.fail("IOException while closing stream");
+                }
+            }
+        }, dataSize / 2);
+        StreamCopyingThread streamCopyingThread = new StreamCopyingThread(listenerMock, inputStream, outputStream,
+                threadName, new ConnectionData(new PeerProperties(), false));
+        streamCopyingThread.setNotifyStreamCopyingProgress(true);
+        Thread runner = new Thread(streamCopyingThread);
+        runner.start();
+        runner.join();
+
+        assertThat("The content of the input stream is equal to the output stream",
+                bOutputStream.toByteArray(),
+                is(data));
+        //We can't write to stream and get the IOException because ByteArrayOutputStream does nothing in close
+        assertThat("Closing input stream closes output stream",
+                ((StreamCopyingThreadOutputStream) outputStream).isCloseCalled,
+                is(true));
+
+    }
+
+    interface OnHalfStreamCopiedListener {
+        void onHalfStreamCopied();
+    }
+
     class ListenerMock implements StreamCopyingThread.Listener {
+
+        OnHalfStreamCopiedListener onHalfStreamCopiedListener;
+        private int halfOfStreamData;
+        private long totalBytesRead;
+        private boolean halfCopiedCalled = false;
+
+        public ListenerMock(OnHalfStreamCopiedListener onHalfStreamCopiedListener, int halfOfStreamData) {
+            this.onHalfStreamCopiedListener = onHalfStreamCopiedListener;
+            this.halfOfStreamData = halfOfStreamData;
+        }
+
+        public ListenerMock() {
+        }
 
         @Override
         public void onStreamCopyError(StreamCopyingThread who, String errorMessage) {
@@ -107,10 +190,18 @@ public class StreamCopyingThreadTest {
         @Override
         public void onStreamCopySucceeded(StreamCopyingThread who, int numberOfBytes) {
             notifications.add(numberOfBytes);
+            totalBytesRead += numberOfBytes;
+            if (onHalfStreamCopiedListener != null) {
+                if (!halfCopiedCalled && totalBytesRead >= halfOfStreamData) {
+                    Log.w("!!", "call onHalfStreamCopied");
+                    onHalfStreamCopiedListener.onHalfStreamCopied();
+                    halfCopiedCalled = true;
+                }
+            }
         }
 
         @Override
-        public void onStreamCopyingThreadDone(StreamCopyingThread who){
+        public void onStreamCopyingThreadDone(StreamCopyingThread who) {
 
         }
     }
@@ -121,6 +212,10 @@ public class StreamCopyingThreadTest {
 
         StreamCopyingThreadInputStream(String s) {
             inputStream = new ByteArrayInputStream(s.getBytes());
+        }
+
+        StreamCopyingThreadInputStream(byte[] data) {
+            inputStream = new ByteArrayInputStream(data);
         }
 
         @Override
@@ -136,9 +231,30 @@ public class StreamCopyingThreadTest {
 
     class StreamCopyingThreadOutputStream extends OutputStream {
 
+        private OutputStream output;
+        volatile boolean isCloseCalled;
+
+        public StreamCopyingThreadOutputStream(OutputStream output) {
+            this.output = output;
+        }
+
         @Override
         public void write(int oneByte) throws IOException {
-            boutputStream.write(oneByte);
+            output.write(oneByte);
         }
+
+        @Override
+        public void write(byte[] buffer) throws IOException {
+            output.write(buffer);
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            output.close();
+            isCloseCalled = true;
+        }
+
+
     }
 }

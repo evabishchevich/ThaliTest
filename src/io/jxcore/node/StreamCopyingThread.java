@@ -132,8 +132,6 @@ class StreamCopyingThread extends Thread {
 //                Log.d(TAG, "Read " + numberOfBytesRead + " bytes (thread ID: " + getId() + ", thread name: " + mThreadName + ")");
                 totalNumberOfBytesRead += numberOfBytesRead;
 
-//                if (numberOfBytesRead !=)
-
 //                Log.d(TAG, "Successfully readed");
                 isRead = true;
 //                Log.d(TAG, "Readed buffer: " + buffer[buffer.length - 1]);
@@ -170,32 +168,11 @@ class StreamCopyingThread extends Thread {
                         + mThreadName + "): " + e.getMessage());
                 errorMessage += ": " + e.getMessage();
                 final String msg = errorMessage;
-//                jxcore.coreThread.handler.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
                 Log.d(TAG, "onStreamCopyError (ID: " + getId() + ", name: " + mThreadName
                         + "). Connection data: "  + connectionData.toString() + " .During the lifetime of the thread the total number of bytes read was "
                         + totalNumberOfBytesRead + " and the total number of bytes written "
                         + totalNumberOfBytesWritten);
                 mListener.onStreamCopyError(StreamCopyingThread.this, msg);
-
-
-//                    }
-//                }, 1000L);
-
-//                new CountDownTimer(1000, 1000){
-//
-//                    @Override
-//                    public void onTick(long millisUntilFinished) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onFinish() {
-//
-//                    }
-//                }.start();
-
             }
         }
 
@@ -210,6 +187,7 @@ class StreamCopyingThread extends Thread {
             mIsInputStreamDone = true;
         }
 
+        Log.d(TAG, "number of bytes read = " + numberOfBytesRead);
         if (mIsInputStreamDone) {
             Log.d(TAG, "onStreamCopyingThreadDone");
             mListener.onStreamCopyingThreadDone(this);
@@ -227,13 +205,10 @@ class StreamCopyingThread extends Thread {
             Log.d(TAG, "closeOutputStream. Flushing");
             mOutputStream.flush();
         } catch (IOException e) {
-            String errorMessage = "Failed to close output stream";
+            String errorMessage = "Failed to flush output stream";
             Log.e(TAG, errorMessage + " (thread ID: " + getId() + ", thread name: "
                     + mThreadName + "): " + e.getMessage());
         }
-//        jxcore.coreThread.handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
         try {
             Log.d(TAG, "closeOutputStream. Closing");
             mOutputStream.close();
@@ -245,11 +220,6 @@ class StreamCopyingThread extends Thread {
             errorMessage += ": " + e.getMessage();
             mListener.onStreamCopyError(StreamCopyingThread.this, errorMessage);
         }
-
-//            }
-//        }, 1000L);
-
-
     }
 
     /**

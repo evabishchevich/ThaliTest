@@ -14,6 +14,8 @@
 //// that will get closed in teardown.
 //var serverToBeClosed = null;
 //
+//var TEST_TIMEOUT = 60 * 4000;
+//
 //var test = tape({
 //  setup: function (t) {
 //    serverToBeClosed = {
@@ -42,6 +44,7 @@
 //  }
 //});
 //
+///*
 //test('Can call start/stopListeningForAdvertisements', function (t) {
 //  Mobile('startListeningForAdvertisements').callNative(function (err) {
 //    t.notOk(err, 'Can call startListeningForAdvertisements without error');
@@ -51,7 +54,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Calling startListeningForAdvertisements twice is NOT an error',
 //function (t) {
 //  Mobile('startListeningForAdvertisements').callNative(function (err) {
@@ -65,7 +70,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Calling stopListeningForAdvertisements without calling start is NOT ' +
 //  'an error', function (t) {
 //  Mobile('stopListeningForAdvertisements').callNative(function (err) {
@@ -76,7 +83,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Can call start/stopUpdateAdvertisingAndListening', function (t) {
 //  Mobile('startUpdateAdvertisingAndListening').callNative(4242, function (err) {
 //    t.notOk(err, 'Can call startUpdateAdvertisingAndListening without error');
@@ -88,7 +97,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Calling startUpdateAdvertisingAndListening twice is NOT an error',
 //function (t) {
 //  Mobile('startUpdateAdvertisingAndListening').callNative(4242, function (err) {
@@ -103,7 +114,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Can call stopUpdateAdvertisingAndListening twice without start and ' +
 //  'it is not an error', function (t) {
 //  Mobile('stopAdvertisingAndListening').callNative(function (err) {
@@ -114,7 +127,9 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('cannot call connect when start listening for advertisements is not ' +
 //  'active', function (t) {
 //  Mobile('connect').callNative('foo', function (err) {
@@ -123,11 +138,13 @@
 //    t.end();
 //  });
 //});
+//*/
 //
 //if (!tape.coordinated) {
 //  return;
 //}
 //
+///*
 //test('peerAvailabilityChange is called', function (t) {
 //  var complete = false;
 //  Mobile('peerAvailabilityChanged').registerToNative(function (peers) {
@@ -158,6 +175,7 @@
 //    });
 //  });
 //});
+//*/
 //
 //function getMessageByLength(socket, lengthOfMessage) {
 //  return new Promise(function (resolve, reject) {
@@ -204,6 +222,11 @@
 //    } else {
 //      logger.info('Connect returned an error: ' + err);
 //
+//         if (err === 'Already connect(ing/ed)') {
+//            failureCb(err, connection, peer);
+//            return;
+//         }
+//
 //      // Retry a failed connection..
 //      if (retries > 0) {
 //        logger.info('Scheduling a connect retry - retries left: ' + retries);
@@ -213,6 +236,9 @@
 //        }, TIME_BETWEEN_RETRIES);
 //        quitSignal && quitSignal.addTimeout(timeoutCancel, successCb);
 //      } else {
+//
+//
+//
 //        if (failureCb) {
 //          logger.warn('Too many connect retries!');
 //          // Exceeded retries..
@@ -268,7 +294,7 @@
 //  return new Promise(function (resolve, reject) {
 //    var dataResult = null;
 //    var connection = net.connect(port, function () {
-//        logger.debug('Write  message (client) : ' + request);
+//      logger.debug('Write  message (client) : ' + request);
 //      connection.write(request);
 //      getMessageByLength(connection, responseLength)
 //        .then(function (data) {
@@ -340,6 +366,7 @@
 //  });
 //}
 //
+///*
 //test('Can connect to a remote peer', function (t) {
 //  var connecting = false;
 //
@@ -419,6 +446,7 @@
 //    });
 //  });
 //});
+//*/
 //
 //function getConnectionToOnePeerAndTest(t, connectTest) {
 //  var echoServer = net.createServer(function (socket) {
@@ -471,11 +499,11 @@
 //  });
 //}
 //
+///*
 //test('Get error when trying to double connect to a peer', function (t) {
-//  /*
-//  We call connect twice in a row synchronously and one should connect and
-//  the other should get an error
-//   */
+//
+//  // We call connect twice in a row synchronously and one should connect and
+//  // the other should get an error
 //  var successfulFailures = 0;
 //  getConnectionToOnePeerAndTest(t, function (listeningPort, currentTestPeer) {
 //    function badConnect() {
@@ -501,14 +529,14 @@
 //    });
 //  });
 //});
+//*/
 //
+///*
 //test('Connect port dies if not connected to in time', function (t) {
-//  /*
-//  If we don't connect to the port returned by the connect call in time
-//  then it should close down and we should get a connection error.
-//
-//  This test should not be ran on Android until #714 is solved (implemented).
-//   */
+//  // If we don't connect to the port returned by the connect call in time
+//  // then it should close down and we should get a connection error.
+//  //
+//  // This test should not be ran on Android until #714 is solved (implemented).
 //  if (jxcore.utils.OSInfo().isAndroid) {
 //    t.ok(true, 'This test is not ran on Android, since it lacks the timeout implementation');
 //    t.end();
@@ -528,7 +556,9 @@
 //    });
 //  }
 //});
+//*/
 //
+///*
 //test('Can shift large amounts of data', function (t) {
 //  var connecting = false;
 //
@@ -678,6 +708,7 @@
 //    });
 //  });
 //});
+//*/
 //
 //function killSkeleton(t, createServerWriteSuccessHandler,
 //                      getMessageAndThenHandler,
@@ -761,44 +792,33 @@
 //        });
 //      secondConnectionToListeningPort.on('error', function (err) {
 //        t.ok(err, 'We got an error which is what we wanted');
-//             connectToPeer(
-//                     peer, 2,
-//                     function (err) {
-//                        logger.debug("can connect to peer")
-//                        t.ok("can connect to peer")
-//                        t.end();
-//                     },
-//                     function (err) {
-//                       logger.debug(err, " error")
-//
-//                       if (err) {
-//                           if(err.message && (err.message != "Already connect(ing/ed)")){
-//                               t.ok(err, "Connection was cleared")
-//                           } else {
-//                               t.notOk(err, err.message)
-//                           }
-//
-//                       }
-//                       else {
-//                           t.ok(err, "Fine")
-//                       }
-//                       t.end();
-//
-//                     }
-//                   );
+//        connectToPeer(
+//          peer, 1,
+//          function (err) {
+//            t.notOk(err, 'We should be able to reconnect');
+//            t.end();
+//          },
+//          function (err) {
+//            t.fail('We should be able to reconnect ' + err);
+//          }
+//        );
 //      });
 //    });
 //}
 //
+///*
 //test('#startUpdateAdvertisingAndListening - ending remote peers connection ' +
 //  'kills the local connection', function (t) {
 //    killRemote(t, true);
 //  });
+//*/
 //
+///*
 //test('#startUpdateAdvertisingAndListening - destroying remote peers ' +
 //  'connection kills the local connection', function (t) {
 //  killRemote(t, false);
 //});
+//*/
 //
 //function killLocal(t, end) {
 //  // pretendLocalMux ---> listeningPort ---> remoteServerNativeListener --->
@@ -826,48 +846,47 @@
 //              t.end();
 //            });
 //        });
-//      secondConnectionToListeningPort.on('error', function (err) {
-//        t.ok(err, 'We got an error which is what we wanted');
-//      });
-//      secondConnectionToListeningPort.on('close', function () {
-//           connectToPeer(
-//             peer, 2,
-//             function (err) {
-//                logger.debug("can connect to peer")
-//                t.ok("can connect to peer")
-//                t.end();
-//             },
-//             function (err) {
-//               logger.debug(err, " error")
 //
-//               if (err) {
-//                   if(err.message && (err.message != "Already connect(ing/ed)")){
-//                       t.ok(err, "Connection was cleared")
-//                   } else {
-//                       t.notOk(err, err.message)
-//                   }
-//
-//               }
-//               else {
-//                   t.ok(err, "Fine")
-//               }
-//               t.end();
-//
-//             }
-//           );
+//      new Promise(function (resolve, reject) {
+//        secondConnectionToListeningPort.on('error', function (err) {
+//          t.ok(err, 'We got an error which is what we wanted');
+//          connectToPeer(
+//            peer, 1,
+//            function (err) {
+//              resolve(err);
+//            },
+//            function (err) {
+//              reject(err);
+//            }
+//          );
+//        });
+//        secondConnectionToListeningPort.on('close', function () {
+//          resolve();
+//        });
+//      })
+//      .then(function (err) {
+//        t.notOk(err, 'We should be able to reconnect');
+//        t.end();
+//      })
+//      .catch(function (err) {
+//        t.fail("We should be able to reconnect" + err);
 //      });
 //    });
 //}
 //
+///*
 //test('#startUpdateAdvertisingAndListening - destroying the local connection ' +
 //  'kills the connection to the remote peer', function (t) {
 //  killLocal(t, false);
 //});
+//*/
 //
+///*
 //test('#startUpdateAdvertisingAndListening - ending the local connection ' +
 //  'kills the connection to the remote peer', function (t) {
 //  killLocal(t, true);
 //});
+//*/
 //
 //function findSmallestParticipant(participants) {
 //  var smallest = null;
@@ -879,6 +898,7 @@
 //  return smallest;
 //}
 //
+///*
 //test('We do not emit peerAvailabilityChanged events until one of the start ' +
 //  'methods is called', function (t) {
 //  // the node with the smallest UUID will be the one who waits 2 seconds
@@ -918,7 +938,7 @@
 //              readyToReceiveEvents = false;
 //              setTimeout(function () {
 //                t.end();
-//              }, 2000);ё
+//              }, 2000);
 //            }, 1000);
 //          });
 //        });
@@ -938,6 +958,7 @@
 //      });
 //  }, 2000);
 //});
+//*/
 //
 //function QuitSignal() {
 //  this.raised = false;
@@ -948,6 +969,13 @@
 //QuitSignal.prototype.addCancelCall = function (cancelCall) {
 //  assert(!this.raised, 'No calling addCancelCall after signal is raised');
 //  this.cancelCalls.push(cancelCall);
+//};
+//
+//QuitSignal.prototype.removeCancelCall = function (cancelCall) {
+//  var index = this.cancelCalls.indexOf(cancelCall);
+//  if (index >= 0) {
+//    this.cancelCalls.splice(index, 1);
+//  }
 //};
 //
 //QuitSignal.prototype.addTimeout = function (timeOut, successCb) {
@@ -1067,6 +1095,7 @@
 //      return validateResponse.FATAL;
 //    }
 //    case protocolResult.SUCCESS: {
+//    logger.debug('Response message validated, serverResponse.code:' + serverResponse.code + ' calling connection.end');
 //      return validateResponse.OK;
 //    }
 //    default: {
@@ -1105,11 +1134,11 @@
 //              return reject(error);
 //            }
 //            case validateResponse.OK: {
-//             // 'parsedMessage.uuid' may be already in 'peersWeSucceededWith'.
+//              // 'parsedMessage.uuid' may be already in 'peersWeSucceededWith'.
 //              // We are just ignoring this case.
 //              peersWeSucceededWith[parsedMessage.uuid] = true;
 //              resolve();
-//              logger.debug('Response validated, message uuid:' + parsedMessage.uuid + ' calling connection.end');
+//              logger.debug('Response validated, calling connection.end');
 //              connection.end();
 //              break;
 //            }
@@ -1132,26 +1161,25 @@
 //}
 //
 //// We want to know whether all remote participants are sitting in `hashTable`.
-// function verifyPeers(t, hashTable) {
-//   var notFoundParticipants = t.participants.filter(function (participant) {
-//     return !hashTable[participant.uuid];
-//   });
-//   // Current local participant should be ignored.
-//   return (
-//     notFoundParticipants.length === 1 &&
-//     notFoundParticipants[0].uuid === tape.uuid
-//   );
+//function verifyPeers(t, hashTable) {
+//  var notFoundParticipants = t.participants.filter(function (participant) {
+//    return !hashTable[participant.uuid];
+//  });
+//  // Current local participant should be ignored.
+//  return (
+//    notFoundParticipants.length === 1 &&
+//    notFoundParticipants[0].uuid === tape.uuid
+//  );
 //}
-//
 //
 //function clientRound(t, roundNumber, boundListener, quitSignal) {
 //  var peersWeAreOrHaveResolved = {};
 //  var peersWeSucceededWith = {};
 //  return new Promise(function (resolve, reject) {
 //    boundListener.listener = function (peers) {
-//        if (verifyPeers(t, peersWeSucceededWith)) {
-//     	    return
-//        }
+//      if (verifyPeers(t, peersWeSucceededWith)) {
+//        return
+//      }
 //
 //      var peerPromises = [];
 //      peers.forEach(function (peer) {
@@ -1193,7 +1221,7 @@
 //      });
 //      Promise.all(peerPromises)
 //        .then(function () {
-//         if (verifyPeers(t, peersWeSucceededWith)) {
+//          if (verifyPeers(t, peersWeSucceededWith)) {
 //            quitSignal.raiseSignal();
 //            resolve();
 //          }
@@ -1227,128 +1255,392 @@
 //  return protocolResult.SUCCESS;
 //}
 //
-//function serverRound(t, roundNumber, pretendLocalMux, quitSignal) {
-//  var validPeersForThisRound = [];
-//  return new Promise(function (resolve, reject) {
-//    quitSignal.addCancelCall(function () {
-//      reject();
-//    });
-//    var connectionListener = function (socket) {
-//      connectionDiesClean(t, socket);
-//      getMessageByLength(socket, messageLength())
-//        .then(function (dataBuffer) {
-//          var parsedMessage = parseMessage(dataBuffer);
-//          var validationResult =
-//            validateRequest(t, roundNumber, parsedMessage);
-//             logger.debug('serverRound: Write message :' + validationResult);
-//                socket.write(createMessage(validationResult), function () {
-//            logger.debug('serverRound: Message written, closing socket (calling socket.end)');
-//            //TODO add timeout
-////            setTimeout(function () {
-////                    logger.debug('serverRound: calling socket.end after timeout');
-////                            socket.end();
-////                          }, 500);
-//            socket.end();
-//          });
+//function ServerRound(t, roundNumber, server, quitSignal) {
+//  this._t           = t;
+//  this._roundNumber = roundNumber;
+//  this._server      = server;
+//  this._quitSignal  = quitSignal;
+//
+//  this._connections       = [];
+//  this._activeConnections = [];
+//  this._validPeers        = {};
+//  this._finishedPromises  = [];
+//}
+//
+//ServerRound.prototype.setRoundNumber = function (roundNumber) {
+//  assert(
+//    Object.getOwnPropertyNames(this._validPeers).length === 0,
+//    'validPeers should be empty in the new round'
+//  );
+//  this._roundNumber = roundNumber;
+//}
+//
+//ServerRound.prototype.bind = function () {
+//  var self = this;
+//
+//  this._killHandler = this._kill.bind(this);
+//  this._quitSignal.addCancelCall(this._killHandler);
+//
+//  this._newConnectionHandler = this._newConnection.bind(this);
+//
+//  function cleanBindPromise() {
+//    delete self._bindPromise;
+//    delete self._bindResolve;
+//    delete self._bindReject;
+//  }
+//
+//  if (this._roundNumber === 0) {
+//    // 0 round calls start update from 'startAndListen'.
+//    // It has called 'startUpdateAdvertisingAndListening' already.
+//
+//    this._server.on('connection', this._newConnectionHandler);
+//    logger.debug('Server round ' + this._roundNumber + ' is ready');
+//  } else {
+//    this._bindPromise = new Promise(function (resolve, reject) {
+//      self._bindResolve = resolve;
+//      self._bindReject  = reject;
+//
+//      Mobile('startUpdateAdvertisingAndListening').callNative(
+//        self._server.address().port,
+//        function (error) {
+//          if (error) {
+//            logger.debug('Server round ' + self._roundNumber + ' is not ready');
+//            reject(error);
+//            return;
+//          }
+//          logger.debug('Server round ' + self._roundNumber + ' is ready');
+//          self._server.on('connection', self._newConnectionHandler);
+//          resolve();
+//        }
+//      );
+//    })
+//    .then(function () {
+//      cleanBindPromise();
+//      // Bypassing data.
+//      return arguments;
+//    })
+//    .catch(function (error) {
+//      cleanBindPromise();
+//      // Bypassing error.
+//      throw error;
+//    })
+//    return this._bindPromise;
+//  }
+//
+//  return Promise.resolve();
+//}
+//
+//ServerRound.prototype.unbind = function () {
+//  if (this._killHandler) {
+//    this._quitSignal.removeCancelCall(this._killHandler);
+//    delete this._killHandler;
+//  }
+//  if (this._newConnectionHandler) {
+//    this._server.removeListener('connection', this._newConnectionHandler);
+//    delete this._newConnectionHandler;
+//  }
+//}
+//
+//ServerRound.prototype._newConnection = function (connection) {
+//  var self = this;
+//
+//  var connectionPromiseReject;
+//  var connectionPromiseResolve;
+//  var connectionPromise = new Promise(function (resolve, reject) {
+//    connectionPromiseReject  = reject;
+//    connectionPromiseResolve = resolve;
+//
+//    // Check whether connection will be properly closed.
+//    connectionDiesClean(self._t, connection);
+//
+//    getMessageByLength(connection, messageLength())
+//    .then(function (dataBuffer) {
+//      var parsedMessage = parseMessage(dataBuffer);
+//        logger.debug("Server round, parsed message = " + parsedMessage);
+//
+//      /*
+//      if (parsedMessage.uuid && self._validPeers[parsedMessage.uuid]) {
+//        // We have seen this peer already.
+//        // We won't send message to him.
+//        connection.end();
+//
+//        var message = 'Peer ' + parsedMessage.uuid +
+//          ' has already been seen by server in ' + self._roundNumber + " round";
+//        logger.debug(message);
+//        throw new Error(message);
+//      }
+//      */
+//
+//      var validationResult = validateRequest(self._t, self._roundNumber, parsedMessage);
+//      return new Promise(function (resolve, reject) {
+//        // We will finish promise only after socket 'end' event.
+//        connection.once('end', function () {
 //          switch (validationResult) {
 //            case protocolResult.WRONG_SYNTAX: // Usually connection died
 //            case protocolResult.WRONG_TEST:
 //            case protocolResult.WRONG_ME:
 //            case protocolResult.WRONG_GEN: {
-//              return;
+//              resolve();
+//              break;
 //            }
 //            case protocolResult.SUCCESS: {
-//              socket.on('end', function () {
-//                validPeersForThisRound.push(parsedMessage.uuid);
-//                if (validPeersForThisRound.length === t.participants.length - 1)
-//                {
-//                  resolve();
-//                }
-//              });
-//              return;
+//              // We can receive here multiple valid peers.
+//              // We can just ignore this case.
+//              self._validPeers[parsedMessage.uuid] = true;
+//              self._checkValidPeers();
+//              resolve();
+//              break;
 //            }
 //            default: {
-//              return reject(new Error('validationResult code ' +
-//                validationResult));
+//              reject(new Error('validationResult code ' + validationResult));
+//              break;
 //            }
 //          }
-//        })
-//        .catch(function (err) {
-//          logger.debug('Got a non-fatal error in server ' + err);
 //        });
-//    };
-//    if (roundNumber === 0) { // 0 round calls start update from startAndListen
-//      pretendLocalMux.on('connection', connectionListener);
-//    } else {
-//      Mobile('startUpdateAdvertisingAndListening').callNative(
-//        pretendLocalMux.address().port,
-//        function (err) {
-//          t.notOk(err, 'Round ' + roundNumber + ' ready');
-//          if (err) {
-//            reject(err);
-//          }
-//          pretendLocalMux.removeAllListeners('connection');
-//          pretendLocalMux.on('connection', connectionListener);
+//        logger.debug('serverRound: Write message :' + validationResult + " for message " + parsedMessage);
+//        // Sending a message to the client with our 'tape.uuid' and 'validationResult'.
+//        connection.write(createMessage(validationResult), function () {
+//          logger.debug(
+//            'serverRound: Message written, closing connection (calling connection.end)'
+//          );
+//          connection.end();
 //        });
-//    }
+//      })
+//      .catch(function (error) {
+//        logger.debug('Got a non-fatal error in server ' + error);
+//      });
+//    })
+//    .then(function () {
+//      // Bypassing data to the parent (connection) promise.
+//      resolve(arguments);
+//    })
+//    .catch(function (error) {
+//      // Bypassing error to the parent (connection) promise.
+//      reject(error);
+//    });
+//  });
+//
+//  // Adding this connection to the connection list.
+//  var connectionData = {
+//    connection: connection,
+//    promise: connectionPromise,
+//    resolve: connectionPromiseResolve,
+//    reject:  connectionPromiseReject
+//  };
+//  this._connections.push(connectionData);
+//
+//  // Adding this connection to the active connection list.
+//  this._activeConnections.push(connectionData);
+//
+//  // Removing this connection from the active connection list on any promise result.
+//  var removeHandler = ServerRound._removeDataFromArray
+//    .bind(null, this._activeConnections, connectionData);
+//  connectionPromise.then(removeHandler).catch(removeHandler);
+//}
+//
+//ServerRound._removeDataFromArray = function (array, data) {
+//  var index = array.indexOf(data);
+//  if (index >= 0) {
+//    array.splice(index, 1);
+//  }
+//}
+//
+//ServerRound.prototype._kill = function () {
+//  var self = this;
+//  this.unbind();
+//
+//  this._validPeers = {};
+//
+//  var promises = [];
+//  var error = new Error('Server emergency shutdown');
+//  if (this._bindReject) {
+//    promises.push(this._bindPromise);
+//    this._bindReject(error);
+//  }
+//  this._activeConnections.forEach(function (data) {
+//    promises.push(data.promise);
+//    data.reject(error);
+//  });
+//
+//  function resolve() {
+//    assert(
+//      !self._bindPromise,
+//      'Bind promise should not exist after server shutdown'
+//    );
+//    assert(
+//      self._activeConnections.length === 0,
+//      'Connection list should be empty after server shutdown'
+//    );
+//    self.resolveFinished();
+//  }
+//  Promise.all(promises)
+//  .then(resolve).catch(resolve);
+//}
+//
+///*
+//ServerRound.prototype._finish = function () {
+//  this.unbind();
+//
+//  this._validPeers = {};
+//
+//  var promise;
+//  if (this._bindPromise) {
+//    promise = this._bindPromise;
+//  } else {
+//    promise = Promise.resolve();
+//  }
+//  var resolveHandler = this.resolveFinished.bind(this);
+//  promise.then(resolveHandler).catch(resolveHandler);
+//}
+//*/
+//
+//ServerRound.prototype._finish = function () {
+//  var self = this;
+//  this.unbind();
+//
+//  this._validPeers = {};
+//
+//  var promises = [];
+//  if (this._bindPromise) {
+//    promises.push(this._bindPromise);
+//    this._bindResolve();
+//  }
+//  this._activeConnections.forEach(function (data) {
+//    promises.push(data.promise);
+//    data.resolve();
+//    data.connection.destroy();
+//  });
+//
+//  function resolve() {
+//    assert(
+//      !self._bindPromise,
+//      'Bind promise should not exist after finish'
+//    );
+//    assert(
+//      self._activeConnections.length === 0,
+//      'Connection list should be empty after finish'
+//    );
+//    self.resolveFinished();
+//  }
+//  Promise.all(promises)
+//  .then(resolve).catch(resolve);
+//}
+//
+//ServerRound.prototype._checkValidPeers = function () {
+//  if (verifyPeers(this._t, this._validPeers)) {
+//    // Server has sucessfully ended its job.
+//    this._finish();
+//  }
+//}
+//
+//ServerRound.prototype.waitUntilFinished = function () {
+//  var promiseResolve;
+//  var promiseReject;
+//  var promise = new Promise(function (resolve, reject) {
+//    promiseResolve = resolve;
+//    promiseReject  = reject;
+//  });
+//  var data = {
+//    resolve: promiseResolve,
+//    reject:  promiseReject
+//  };
+//
+//  // Adding this promise to the finished promise list.
+//  this._finishedPromises.push(data);
+//
+//  // Removing this promise from the finished promise list on any promise result.
+//  var removeHandler = ServerRound._removeDataFromArray
+//    .bind(null, this._finishedPromises, data);
+//  promise.then(removeHandler).catch(removeHandler);
+//
+//  return promise;
+//}
+//
+//ServerRound.prototype.resolveFinished = function () {
+//  var self = this;
+//
+//  // We are waiting for all connections to be finished.
+//  // If it was a fatal error from any connection we will catch this.
+//
+//  Promise.all(this._connections.map(function (data) {
+//    return data.promise;
+//  }))
+//  .then(function () {
+//    self._finishedPromises.forEach(function (data) {
+//      data.resolve();
+//    });
+//  })
+//  .catch(function (error) {
+//    logger.debug('Server got fatal error ' + error);
+//    self._finishedPromises.forEach(function (data) {
+//      data.reject(error);
+//    });
+//  })
+//  .then(function () {
+//    assert(
+//      self._finishedPromises.length === 0,
+//      'Finished promise list should be empty after finish'
+//    );
 //  });
 //}
 //
-//function setUpPretendLocalMux() {
-//  var pretendLocalMux = net.createServer();
-//  pretendLocalMux.on('error', function (err) {
-//    logger.debug('got error on pretendLocalMux ' + err);
+//test('Test updating advertising and parallel data transfer', function (t) {
+//  var server = net.createServer();
+//  server.on('error', function (err) {
+//    logger.debug('got error while creating server ' + err);
+//  });
+//  server = makeIntoCloseAllServer(server);
+//  // 'teardown' will call close method of 'serverToBeClosed'
+//  // and all connections will be properly closed.
+//  serverToBeClosed = server;
+//
+//  var clientQuitSignal = new QuitSignal();
+//  var serverQuitSignal = new QuitSignal();
+//
+//  // Lets us change our listeners for incoming peer events between rounds.
+//  // This is just to avoid having to set up another emitter.
+//  var boundListener = {
+//    listener: null
+//  };
+//
+//  var timeoutId = setTimeout(function () {
+//    clientQuitSignal.raiseSignal();
+//    serverQuitSignal.raiseSignal();
+//    t.fail('Test timed out');
+//    t.end();
+//  }, TEST_TIMEOUT);
+//
+//  var serverRound = new ServerRound(t, 0, server, serverQuitSignal);
+//  Promise.all([
+//    clientRound(t, 0, boundListener, clientQuitSignal),
+//    serverRound.bind()
+//    .then(function () {
+//      return serverRound.waitUntilFinished();
+//    })
+//  ])
+//  .then(function () {
+//    logger.debug('We made it through round one');
+//
+//    serverRound.setRoundNumber(1);
+//    clientQuitSignal = new QuitSignal();
+//    return Promise.all([
+//      clientRound(t, 1, boundListener, clientQuitSignal),
+//      serverRound.bind()
+//      .then(function () {
+//        return serverRound.waitUntilFinished();
+//      })
+//    ]);
+//  })
+//  .catch(function (err) {
+//    t.fail('Got error ' + err);
+//  })
+//  .then(function () {
+//    logger.debug('We made it through round two');
+//    clearTimeout(timeoutId);
+//    t.end();
 //  });
 //
-//  pretendLocalMux = makeIntoCloseAllServer(pretendLocalMux);
-//  serverToBeClosed = pretendLocalMux;
-//
-//  return pretendLocalMux;
-//}
-//
-////test('Test updating advertising and parallel data transfer', function (t) {
-////  var pretendLocalMux = setUpPretendLocalMux();
-////  var clientQuitSignal = new QuitSignal();
-////  var serverQuitSignal = new QuitSignal();
-////
-////  /*
-////   * Lets us change our listeners for incoming peer events between rounds.
-////   * This is just to avoid having to set up another emitter
-////   */
-////  var boundListener = {
-////    listener: null
-////  };
-////
-////  var timeoutId = setTimeout(function () {
-////    clientQuitSignal.raiseSignal();
-////    serverQuitSignal.raiseSignal();
-////    t.fail('Test timed out');
-////    t.end();
-////  }, 60 * 2000);
-////
-////  Promise.all([clientRound(t, 0, boundListener, clientQuitSignal),
-////               serverRound(t, 0, pretendLocalMux, serverQuitSignal)])
-////    .then(function () {
-////      logger.debug('We made it through round one');
-////
-////      clientQuitSignal = new QuitSignal();
-////      serverQuitSignal = new QuitSignal();
-////
-////      return Promise.all([clientRound(t, 1, boundListener, clientQuitSignal),
-////                          serverRound(t, 1, pretendLocalMux,
-////                                      serverQuitSignal)]);
-//////        return Promise.resolve();
-////    })
-////    .catch(function (err) {
-////      t.fail('Got error ' + err);
-////    })
-////    .then(function () {
-////      clearTimeout(timeoutId);
-////      t.end();
-////    });
-////
-////  startAndListen(t, pretendLocalMux, function (peers) {
-////    logger.debug("!!!!!! Peers : " + JSON.stringify(peers));
-////    boundListener.listener(peers);
-////  });
-////});
+//  startAndListen(t, server, function (peers) {
+//    boundListener.listener(peers);
+//  });
+//});
