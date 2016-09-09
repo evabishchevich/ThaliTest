@@ -5,9 +5,11 @@ package io.jxcore.node;
 
 import android.os.CountDownTimer;
 import android.util.Log;
+
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManagerSettings;
+
 import java.util.Date;
 
 /**
@@ -25,7 +27,7 @@ public class StartStopOperationHandler {
      * Constructor.
      *
      * @param connectionManager The connection manager.
-     * @param discoveryManager The discovery manager.
+     * @param discoveryManager  The discovery manager.
      */
     public StartStopOperationHandler(ConnectionManager connectionManager, DiscoveryManager discoveryManager) {
         mConnectionManager = connectionManager;
@@ -50,7 +52,7 @@ public class StartStopOperationHandler {
      *
      * @param startAdvertising If true, will start advertising. If false, will only start listening
      *                         for advertisements.
-     * @param callback The callback to call when we get the operation result.
+     * @param callback         The callback to call when we get the operation result.
      */
     public synchronized void executeStartOperation(boolean startAdvertising, JXcoreThaliCallback callback) {
         if (mCurrentOperation != null) {
@@ -67,7 +69,7 @@ public class StartStopOperationHandler {
      *
      * @param stopOnlyListeningForAdvertisements If true, will only stop listening for advertisements.
      *                                           If false, will stop everything.
-     * @param callback The callback to call when we get the operation result.
+     * @param callback                           The callback to call when we get the operation result.
      */
     public synchronized void executeStopOperation(
             boolean stopOnlyListeningForAdvertisements, JXcoreThaliCallback callback) {
@@ -142,22 +144,50 @@ public class StartStopOperationHandler {
                     mCurrentOperation = null;
                     return;
                 }
+                boolean shouldAdvertise = !shouldStartOrStopListeningToAdvertisementsOnly;
 
-                boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
-                if (shouldStartOrStopListeningToAdvertisementsOnly){
-                    adv = mDiscoveryManager.isAdvertising();
-
+                if (shouldStartOrStopListeningToAdvertisementsOnly) {
+                    shouldAdvertise = mDiscoveryManager.isAdvertising();
                 }
-
                 if (!mDiscoveryManager.start(
                         shouldStartOrStopListeningToAdvertisementsOnly,
-                        adv)) {
+                        shouldAdvertise)) {
                     final String errorMessage = "Failed to start the discovery manager";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
                     mCurrentOperation = null;
                 }
-            } else {
+            }
+
+
+//            if (mCurrentOperation.isStartOperation()) {
+//                // Connection manager shouldn't be started if we want to listen to *advertisements* only
+//                if (!shouldStartOrStopListeningToAdvertisementsOnly
+//                        && !mConnectionManager.startListeningForIncomingConnections()) {
+//                    final String errorMessage = "Failed to start the connection manager (Bluetooth connection listener)";
+//                    Log.e(TAG, "executeCurrentOperation: " + errorMessage);
+//                    mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
+//                    mCurrentOperation = null;
+//                    return;
+//                }
+//
+//                boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
+//                if (shouldStartOrStopListeningToAdvertisementsOnly){
+//                    adv = mDiscoveryManager.isAdvertising();
+//
+//                }
+//
+//                if (!mDiscoveryManager.start(
+//                        shouldStartOrStopListeningToAdvertisementsOnly,
+//                        adv)) {
+//                    final String errorMessage = "Failed to start the discovery manager";
+//                    Log.e(TAG, "executeCurrentOperation: " + errorMessage);
+//                    mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
+//                    mCurrentOperation = null;
+//                }
+//            }
+
+            else {
                 // Is stop operation
                 if (shouldStartOrStopListeningToAdvertisementsOnly) {
                     // Should only stop listening to advertisements

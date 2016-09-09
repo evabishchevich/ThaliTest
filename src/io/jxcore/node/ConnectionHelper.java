@@ -36,12 +36,15 @@ public class ConnectionHelper
 
     public static final int NO_PORT_NUMBER = 0;
     private static final String SERVICE_TYPE = "Cordovap2p._tcp";
-    private static final String SERVICE_UUID_AS_STRING = "fa87c0d0-afac-11de-8a39-0800200c9a66";
-    private static final String BLE_SERVICE_UUID_AS_STRING = "b6a44ad1-d319-4b3a-815d-8b805a47fb51";
+//    private static final String SERVICE_UUID_AS_STRING = "fa87c0d0-afac-11de-8a39-0800200c9a66";
+    private static final String SERVICE_UUID_AS_STRING = "fa87c0d0-afac-11de-8a39-0800200c9a68";
+//    private static final String BLE_SERVICE_UUID_AS_STRING = "b6a44ad1-d319-4b3a-815d-8b805a47fb51";
+    private static final String BLE_SERVICE_UUID_AS_STRING = "b6a44ad1-d319-4b3a-815d-8b805a47fb52";
     private static final String BLUETOOTH_NAME = "Thali_Bluetooth";
     private static final UUID SERVICE_UUID = UUID.fromString(SERVICE_UUID_AS_STRING);
     private static final UUID BLE_SERVICE_UUID = UUID.fromString(BLE_SERVICE_UUID_AS_STRING);
-    private static final int MANUFACTURER_ID = 7413;
+//    private static final int MANUFACTURER_ID = 7413;
+    private static final int MANUFACTURER_ID = 7414;
     private static final long NOTIFY_DISCOVERY_ADVERTISING_STATE_DELAY_IN_MILLISECONDS = 500;
     private static final long POWER_UP_BLE_DISCOVERY_DELAY_IN_MILLISECONDS = 15000;
     private static final int MAXIMUM_NUMBER_OF_CONNECTIONS = 30; // TODO: Determine a way to figure out a proper value here, see issue #37
