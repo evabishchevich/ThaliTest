@@ -145,49 +145,20 @@ public class StartStopOperationHandler {
                     return;
                 }
                 boolean shouldAdvertise = !shouldStartOrStopListeningToAdvertisementsOnly;
+                boolean shouldDiscovery = shouldStartOrStopListeningToAdvertisementsOnly;
 
                 if (shouldStartOrStopListeningToAdvertisementsOnly) {
                     shouldAdvertise = mDiscoveryManager.isAdvertising();
+                } else {
+                    shouldDiscovery = mDiscoveryManager.isDiscovering();
                 }
-                if (!mDiscoveryManager.start(
-                        shouldStartOrStopListeningToAdvertisementsOnly,
-                        shouldAdvertise)) {
+                if (!mDiscoveryManager.start(shouldDiscovery, shouldAdvertise)) {
                     final String errorMessage = "Failed to start the discovery manager";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
                     mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
                     mCurrentOperation = null;
                 }
-            }
-
-
-//            if (mCurrentOperation.isStartOperation()) {
-//                // Connection manager shouldn't be started if we want to listen to *advertisements* only
-//                if (!shouldStartOrStopListeningToAdvertisementsOnly
-//                        && !mConnectionManager.startListeningForIncomingConnections()) {
-//                    final String errorMessage = "Failed to start the connection manager (Bluetooth connection listener)";
-//                    Log.e(TAG, "executeCurrentOperation: " + errorMessage);
-//                    mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
-//                    mCurrentOperation = null;
-//                    return;
-//                }
-//
-//                boolean adv  = !shouldStartOrStopListeningToAdvertisementsOnly;
-//                if (shouldStartOrStopListeningToAdvertisementsOnly){
-//                    adv = mDiscoveryManager.isAdvertising();
-//
-//                }
-//
-//                if (!mDiscoveryManager.start(
-//                        shouldStartOrStopListeningToAdvertisementsOnly,
-//                        adv)) {
-//                    final String errorMessage = "Failed to start the discovery manager";
-//                    Log.e(TAG, "executeCurrentOperation: " + errorMessage);
-//                    mCurrentOperation.getCallback().callOnStartStopCallback(errorMessage);
-//                    mCurrentOperation = null;
-//                }
-//            }
-
-            else {
+            } else {
                 // Is stop operation
                 if (shouldStartOrStopListeningToAdvertisementsOnly) {
                     // Should only stop listening to advertisements
