@@ -179,32 +179,32 @@ public class StartStopOperationTest {
 
         assertThat("mStartStopOperation should not be null", mStartStopOperation,
                 is(notNullValue()));
-        assertThat("getShouldStartOrStopListeningToAdvertisementsOnly should return true",
-                mStartStopOperation.getShouldStartOrStopListeningToAdvertisementsOnly(), is(true));
+        assertThat("shouldAffectListeningToAdvertisementsOnly should return true",
+                mStartStopOperation.shouldAffectListeningToAdvertisementsOnly(), is(true));
 
         mStartStopOperation =
                 StartStopOperation.createStartOperation(false, mJXcoreThaliCallback);
 
         assertThat("mStartStopOperation should not be null", mStartStopOperation,
                 is(notNullValue()));
-        assertThat("getShouldStartOrStopListeningToAdvertisementsOnly should return false",
-                mStartStopOperation.getShouldStartOrStopListeningToAdvertisementsOnly(), is(false));
+        assertThat("shouldAffectListeningToAdvertisementsOnly should return false",
+                mStartStopOperation.shouldAffectListeningToAdvertisementsOnly(), is(false));
 
         mStartStopOperation =
                 StartStopOperation.createStopOperation(true, mJXcoreThaliCallback);
 
         assertThat("mStartStopOperation should not be null", mStartStopOperation,
                 is(notNullValue()));
-        assertThat("getShouldStartOrStopListeningToAdvertisementsOnly should return true",
-                mStartStopOperation.getShouldStartOrStopListeningToAdvertisementsOnly(), is(true));
+        assertThat("shouldAffectListeningToAdvertisementsOnly should return true",
+                mStartStopOperation.shouldAffectListeningToAdvertisementsOnly(), is(true));
 
         mStartStopOperation =
                 StartStopOperation.createStopOperation(false, mJXcoreThaliCallback);
 
         assertThat("mStartStopOperation should not be null", mStartStopOperation,
                 is(notNullValue()));
-        assertThat("getShouldStartOrStopListeningToAdvertisementsOnly should return false",
-                mStartStopOperation.getShouldStartOrStopListeningToAdvertisementsOnly(), is(false));
+        assertThat("shouldAffectListeningToAdvertisementsOnly should return false",
+                mStartStopOperation.shouldAffectListeningToAdvertisementsOnly(), is(false));
     }
 
     @Test

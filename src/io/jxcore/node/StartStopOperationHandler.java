@@ -119,7 +119,7 @@ public class StartStopOperationHandler {
         }
 
         if (mCurrentOperation.isStartOperation()
-                && !mCurrentOperation.getShouldStartOrStopListeningToAdvertisementsOnly()) {
+                && !mCurrentOperation.shouldAffectListeningToAdvertisementsOnly()) {
             updateBeaconAdExtraInformation();
         }
 
@@ -131,12 +131,12 @@ public class StartStopOperationHandler {
             mCurrentOperation = null;
         } else {
             Log.v(TAG, "executeCurrentOperation: Executing: " + mCurrentOperation.toString());
-            final boolean shouldStartOrStopListeningToAdvertisementsOnly =
-                    mCurrentOperation.getShouldStartOrStopListeningToAdvertisementsOnly();
+            final boolean shouldAffectListeningToAdvertisementsOnly =
+                    mCurrentOperation.shouldAffectListeningToAdvertisementsOnly();
 
             if (mCurrentOperation.isStartOperation()) {
                 // Connection manager shouldn't be started if we want to listen to *advertisements* only
-                if (!shouldStartOrStopListeningToAdvertisementsOnly
+                if (!shouldAffectListeningToAdvertisementsOnly
                         && !mConnectionManager.startListeningForIncomingConnections()) {
                     final String errorMessage = "Failed to start the connection manager (Bluetooth connection listener)";
                     Log.e(TAG, "executeCurrentOperation: " + errorMessage);
@@ -144,10 +144,10 @@ public class StartStopOperationHandler {
                     mCurrentOperation = null;
                     return;
                 }
-                boolean shouldAdvertise = !shouldStartOrStopListeningToAdvertisementsOnly;
-                boolean shouldDiscovery = shouldStartOrStopListeningToAdvertisementsOnly;
+                boolean shouldAdvertise = !shouldAffectListeningToAdvertisementsOnly;
+                boolean shouldDiscovery = shouldAffectListeningToAdvertisementsOnly;
 
-                if (shouldStartOrStopListeningToAdvertisementsOnly) {
+                if (shouldAffectListeningToAdvertisementsOnly) {
                     shouldAdvertise = mDiscoveryManager.isAdvertising();
                 } else {
                     shouldDiscovery = mDiscoveryManager.isDiscovering();
@@ -160,7 +160,7 @@ public class StartStopOperationHandler {
                 }
             } else {
                 // Is stop operation
-                if (shouldStartOrStopListeningToAdvertisementsOnly) {
+                if (shouldAffectListeningToAdvertisementsOnly) {
                     // Should only stop listening to advertisements
                     mDiscoveryManager.stopDiscovery();
                 } else {
