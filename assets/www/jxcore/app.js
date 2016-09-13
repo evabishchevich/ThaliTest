@@ -36,7 +36,7 @@ if (process.platform === 'android' || process.platform === 'ios') {
     return;
   }
   //TODO uncomment node tests
-//  return;
+  return;
 }
 
 ThaliMobile.getNetworkStatus()

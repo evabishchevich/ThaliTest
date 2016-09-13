@@ -15,6 +15,6 @@ import io.jxcore.node.StreamCopyingThreadTest;
 
 @RunWith(Suite.class)
 //@Suite.SuiteClasses({ConnectionHelperTest.class,ConnectionModelTest.class,ConnectivityMonitorTest.class,IncomingSocketThreadTest.class,LifeCycleMonitorTest.class,ListenerOrIncomingConnectionTest.class,OutgoingSocketThreadTest.class,SocketThreadBaseTest.class,StartStopOperationHandlerTest.class,StartStopOperationTest.class,StreamCopyingThreadTest.class})
-@Suite.SuiteClasses({ StreamCopyingThreadTest.class})
+@Suite.SuiteClasses({ StartStopOperationHandlerTest.class})
 public class ThaliTestSuite {
 }

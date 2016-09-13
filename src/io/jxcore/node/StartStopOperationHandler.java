@@ -21,7 +21,7 @@ public class StartStopOperationHandler {
     private final ConnectionManager mConnectionManager;
     private final DiscoveryManager mDiscoveryManager;
     private CountDownTimer mOperationTimeoutTimer = null;
-    private StartStopOperation mCurrentOperation = null;
+    private volatile StartStopOperation mCurrentOperation = null;
 
     /**
      * Constructor.
