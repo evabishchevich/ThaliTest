@@ -38,12 +38,8 @@ public class StartStopOperationHandler {
      * Cancels the current operation.
      * Note that the callback of the current operations, if one exists, will not be called.
      */
-    public void cancelCurrentOperation() {
-        if (mOperationTimeoutTimer != null) {
-            mOperationTimeoutTimer.cancel();
-            mOperationTimeoutTimer = null;
-        }
-
+    public synchronized void cancelCurrentOperation() {
+        cancelTimer();
         mCurrentOperation = null;
     }
 
@@ -89,25 +85,12 @@ public class StartStopOperationHandler {
     public synchronized void checkCurrentOperationStatus() {
         if (mCurrentOperation != null && isTargetState(mCurrentOperation) == null) {
             Log.d(TAG, "checkCurrentOperationStatus: Operation successfully executed");
-
-            if (mOperationTimeoutTimer != null) {
-                mOperationTimeoutTimer.cancel();
-                mOperationTimeoutTimer = null;
-            }
-
-            /*jxcore.coreThread.handler.postDelayed(new Runnable() {
-                final StartStopOperation operation = mCurrentOperation;
-
-                @Override
-                public void run() {
-                    operation.getCallback().callOnStartStopCallback(null);
-                }
-            }, 2000);*/
-
+            cancelTimer();
             mCurrentOperation.getCallback().callOnStartStopCallback(null);
             mCurrentOperation = null;
         }
     }
+
 
     /**
      * Executes the current operation.
@@ -173,10 +156,7 @@ public class StartStopOperationHandler {
         }
 
         if (mCurrentOperation != null) {
-            if (mOperationTimeoutTimer != null) {
-                mOperationTimeoutTimer.cancel();
-                mOperationTimeoutTimer = null;
-            }
+            cancelTimer();
 
             mCurrentOperation.setOperationExecutedTime(new Date().getTime());
 
@@ -203,6 +183,13 @@ public class StartStopOperationHandler {
         }
     }
 
+    private void cancelTimer() {
+        if (mOperationTimeoutTimer != null) {
+            mOperationTimeoutTimer.cancel();
+            mOperationTimeoutTimer = null;
+        }
+    }
+
     /**
      * Checks if the current states match the expected outcome of the given operation after executed.
      *
@@ -216,6 +203,7 @@ public class StartStopOperationHandler {
                 mDiscoveryManager.isDiscovering(),
                 mDiscoveryManager.isAdvertising());
     }
+
 
     /**
      * Updates the extra information of the beacon advertisement to notify the listeners that we

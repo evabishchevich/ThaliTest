@@ -879,65 +879,65 @@ function findSmallestParticipant(participants) {
   return smallest;
 }
 
-test('We do not emit peerAvailabilityChanged events until one of the start ' +
-  'methods is called', function (t) {
-  // the node with the smallest UUID will be the one who waits 2 seconds
-  // before listening for advertisements and making sure it gets some.
-  // Everyone else will just start advertising immediately and end the
-  // test (waiting for the smallest peer ID to end when it sees the
-  // announcements and thus close)
-  var smallest = findSmallestParticipant(t.participants);
-
-  if (tape.uuid !== smallest) {
-    Mobile('startListeningForAdvertisements').callNative(function (err) {
-      t.notOk(err, 'We should start listening fine');
-      Mobile('startUpdateAdvertisingAndListening').callNative(4242,
-        function (err) {
-          t.notOk(err, 'We should start updating fine');
-          t.end();
-        });
-    });
-    return;
-  }
-
-  var readyToReceiveEvents = false;
-  var gotFirstChanged = false;
-  Mobile('peerAvailabilityChanged').registerToNative(function () {
-    if (!readyToReceiveEvents) {
-      t.fail('We got an availability event too soon');
-    } else {
-      if (!gotFirstChanged) {
-        gotFirstChanged = true;
-        // Stop listening, give some time for any in queue ads to drain and
-        // then check we aren't getting any further ads
-        Mobile('stopAdvertisingAndListening').callNative(function (err) {
-          t.notOk(err, 'stop ads worked');
-          Mobile('stopListeningForAdvertisements').callNative(function (err) {
-            t.notOk(err, 'test stop worked');
-            setTimeout(function () {
-              readyToReceiveEvents = false;
-              setTimeout(function () {
-                t.end();
-              }, 2000);ё
-            }, 1000);
-          });
-        });
-      }
-    }
-  });
-
-  setTimeout(function () {
-    readyToReceiveEvents = true;
-    // Only calling start update for iOS
-    Mobile('startUpdateAdvertisingAndListening').callNative(4242,
-      function (err) {
-        t.notOk(err, 'Ready to advertise');
-        Mobile('startListeningForAdvertisements').callNative(function (err) {
-          t.notOk(err, 'Ready to listen');
-        });
-      });
-  }, 2000);
-});
+//test('We do not emit peerAvailabilityChanged events until one of the start ' +
+//  'methods is called', function (t) {
+//  // the node with the smallest UUID will be the one who waits 2 seconds
+//  // before listening for advertisements and making sure it gets some.
+//  // Everyone else will just start advertising immediately and end the
+//  // test (waiting for the smallest peer ID to end when it sees the
+//  // announcements and thus close)
+//  var smallest = findSmallestParticipant(t.participants);
+//
+//  if (tape.uuid !== smallest) {
+//    Mobile('startListeningForAdvertisements').callNative(function (err) {
+//      t.notOk(err, 'We should start listening fine');
+//      Mobile('startUpdateAdvertisingAndListening').callNative(4242,
+//        function (err) {
+//          t.notOk(err, 'We should start updating fine');
+//          t.end();
+//        });
+//    });
+//    return;
+//  }
+//
+//  var readyToReceiveEvents = false;
+//  var gotFirstChanged = false;
+//  Mobile('peerAvailabilityChanged').registerToNative(function () {
+//    if (!readyToReceiveEvents) {
+//      t.fail('We got an availability event too soon');
+//    } else {
+//      if (!gotFirstChanged) {
+//        gotFirstChanged = true;
+//        // Stop listening, give some time for any in queue ads to drain and
+//        // then check we aren't getting any further ads
+//        Mobile('stopAdvertisingAndListening').callNative(function (err) {
+//          t.notOk(err, 'stop ads worked');
+//          Mobile('stopListeningForAdvertisements').callNative(function (err) {
+//            t.notOk(err, 'test stop worked');
+//            setTimeout(function () {
+//              readyToReceiveEvents = false;
+//              setTimeout(function () {
+//                t.end();
+//              }, 2000);ё
+//            }, 1000);
+//          });
+//        });
+//      }
+//    }
+//  });
+//
+//  setTimeout(function () {
+//    readyToReceiveEvents = true;
+//    // Only calling start update for iOS
+//    Mobile('startUpdateAdvertisingAndListening').callNative(4242,
+//      function (err) {
+//        t.notOk(err, 'Ready to advertise');
+//        Mobile('startListeningForAdvertisements').callNative(function (err) {
+//          t.notOk(err, 'Ready to listen');
+//        });
+//      });
+//  }, 2000);
+//});
 
 function QuitSignal() {
   this.raised = false;

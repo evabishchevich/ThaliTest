@@ -65,18 +65,18 @@ var testFunctionBeforeStart = function (t, functionName) {
     t.end();
   });
 };
-
-test('#startListeningForAdvertisements should fail if start not called',
-  function (t) {
-    testFunctionBeforeStart(t, 'startListeningForAdvertisements');
-  }
-);
-
-test('#startUpdateAdvertisingAndListening should fail if start not called',
-  function (t) {
-    testFunctionBeforeStart(t, 'startUpdateAdvertisingAndListening');
-  }
-);
+//
+//test('#startListeningForAdvertisements should fail if start not called',
+//  function (t) {
+//    testFunctionBeforeStart(t, 'startListeningForAdvertisements');
+//  }
+//);
+//
+//test('#startUpdateAdvertisingAndListening should fail if start not called',
+//  function (t) {
+//    testFunctionBeforeStart(t, 'startUpdateAdvertisingAndListening');
+//  }
+//);
 
 test('should be able to call #stopListeningForAdvertisements many times',
   function (t) {
@@ -690,7 +690,7 @@ test('We provide notification when a listener dies and we recreate it',
       function nonTCPAvailableHandler(record) {
         // TODO:
         // There is a race condition when this test is ran on Android:
-        // This function is called just before recreatedHandler leading
+        // This function is called juClient to server request coordinatedst before recreatedHandler leading
         // to recreatedPort being null.
         // Re-enable the check below once #719 is fixed.
         // Note that due to other changes we also need to add in a test to
