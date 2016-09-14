@@ -1,139 +1,69 @@
 'use strict';
 
-var spawn = require('child_process').spawn;
+var fs = require('fs-extra-promise');
+var path = require('path');
+var thaliTape = require('./lib/thaliTape');
+var testUtils = require('./lib/testUtils');
+var logger = require('thali/thaliLogger')('runTests');
 
-var DEFAULT_INSTANCE_COUNT = 3;
+// The global.Mobile object is replaced here after thaliTape
+// has been required so that thaliTape can pick up the right
+// test framework to be used.
+if (typeof Mobile === 'undefined') {
+  global.Mobile = require('./lib/wifiBasedNativeMock.js')();
+}
 
-var parseargv = require('minimist');
-var argv = parseargv(process.argv.slice(2), {
-  default: {
-    test: 'UnitTest_app.js',
-    filter: null,
-    instanceCount: DEFAULT_INSTANCE_COUNT,
-    serverLogs: true,
-    instanceLogs: true,
-    waitForInstance: false,
-    showFailedLog: false
-  },
-  boolean: [
-    'serverLogs',
-    'instanceLogs',
-    'waitForInstance',
-    'showFailedLog'
-  ],
-  string: ['test', 'filter']
+var hasJavaScriptSuffix = function (path) {
+  return path.indexOf('.js', path.length - 3) !== -1;
+};
+
+var loadFile = function (filePath) {
+  console.info('Test runner loading file: ' + filePath);
+  try {
+    require(filePath);
+  } catch (error) {
+    logger.error(error);
+    throw new Error('Error when loading file ' + filePath + ': ' + error);
+  }
+};
+
+var testsToRun = process.argv.length > 2 ? process.argv[2] : 'bv_tests';
+
+if (hasJavaScriptSuffix(testsToRun)) {
+  loadFile(path.join(__dirname, testsToRun));
+} else {
+  fs.readdirSync(path.join(__dirname, testsToRun)).forEach(function (fileName) {
+    if ((fileName.indexOf('test') === 0) &&
+         hasJavaScriptSuffix(fileName)) {
+      var filePath = path.join(__dirname, testsToRun, fileName);
+      loadFile(filePath);
+    }
+  });
+}
+
+var platform;
+if (
+  typeof jxcore !== 'undefined' &&
+  jxcore &&
+  jxcore.utils &&
+  jxcore.utils.OSInfo() &&
+  jxcore.utils.OSInfo().isAndroid
+) {
+  platform = 'android';
+} else {
+  platform = 'ios';
+}
+
+testUtils.hasRequiredHardware()
+.then(function (hasRequiredHardware) {
+  return testUtils.getOSVersion()
+  .then(function (version) {
+    return thaliTape.begin(platform, version, hasRequiredHardware);
+  })
+})
+.then(function () {
+  process.exit(0);
+})
+.catch(function () {
+  process.exit(1);
 });
-
-var spawnedInstanceCount = argv.instanceCount;
-if (argv.waitForInstance) {
-  spawnedInstanceCount = spawnedInstanceCount - 1;
-}
-
-var instanceLogs = {};
-
-var logInstanceOutput = function (data, instanceId) {
-  instanceLogs[instanceId] += data;
-
-  if (argv.serverLogs && instanceId === 0) {
-    jxcore.utils.console.log(data + '');
-  } else if (argv.instanceLogs) {
-    var colors = [
-      'green',
-      'cyan',
-      'yellow',
-      'magenta',
-      'grey'
-    ];
-
-    // Use grey color for instances that don't have
-    // own color in the colors array.
-    var color = instanceId <= colors.length ?
-      instanceId - 1 : colors.length-1;
-
-    jxcore.utils.console.log(data + '', colors[color]);
-
-  }
-};
-
-var setListeners = function (instance, instanceId) {
-  instanceLogs[instanceId] = '';
-
-  instance.stdout
-  .on('data', function (data) {
-    logInstanceOutput(data, instanceId);
-
-    if (data.indexOf('PROCESS_ON_EXIT_') >= 0) {
-      if (data.indexOf('PROCESS_ON_EXIT_FAILED') >= 0) {
-        if (argv.showFailedLog) {
-          console.log(instanceLogs[instanceId]);
-        }
-        shutdown(1);
-      }
-    } else if (data.indexOf('-== END ==-') >= 0) {
-      if (instanceLogs[0].indexOf('RESULT: FAIL') >= 0) {
-        console.log('TEST FAILED - SEE ABOVE FOR MORE DETAILS');
-        shutdown(1);
-      } else {
-        shutdown(0);
-      }
-    }
-  })
-  .on('end', function () {
-    logInstanceOutput('stdout finished', instanceId);
-  });
-
-  instance.stderr
-  .on('data', function (data) {
-    logInstanceOutput(data, instanceId);
-  })
-  .on('end', function () {
-    logInstanceOutput('stderr finished', instanceId);
-  });
-};
-
-var testServerConfiguration = {
-  'devices': {
-    'android': 0,
-    'ios': argv.instanceCount
-  },
-  'honorCount': true,
-  userConfig: {
-    ios: {
-      numDevices: argv.instanceCount
-    },
-    android: {
-      numDevices: 0
-    }
-  }
-};
-
-var testServerInstance = spawn('jx', ['../../TestServer/index.js',
-  JSON.stringify(testServerConfiguration)]);
-setListeners(testServerInstance, 0);
-
-var testInstances = {};
-var spawnTestInstance = function (instanceId) {
-  var instanceArgs = [argv.test];
-  if (argv.filter) {
-    instanceArgs.push(argv.filter);
-  }
-  var testInstance = spawn('jx', instanceArgs);
-  setListeners(testInstance, instanceId);
-  testInstances[instanceId] = testInstance;
-};
-
-for (var i = 1; i <= spawnedInstanceCount; i++) {
-  spawnTestInstance(i);
-}
-
-var shutdown = function (code) {
-  // A small delay so that instances have time to print
-  // the test results.
-  setTimeout(function () {
-    Object.keys(testInstances).forEach(function (key) {
-      testInstances[key].kill();
-    });
-    testServerInstance.kill();
-    process.exit(code);
-  }, 100);
-};
