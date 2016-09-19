@@ -2,6 +2,7 @@
  * See the license file delivered with this project for further information.
  */
 package io.jxcore.node;
+
 import com.test.thalitest.RegisterExecuteUT;
 
 import android.content.Context;
@@ -108,8 +109,8 @@ public class JXcoreExtension {
         });
 
         lifeCycleMonitor.start();
-		RegisterExecuteUT.Register();
-		/*
+        RegisterExecuteUT.Register();
+        /*
 			This is the line where we are dynamically sticking execution of UT during build, so if you are
 			editing this line, please check updateJXCoreExtensionWithUTMethod in androidBeforeCompile.js.
 		*/
@@ -225,11 +226,7 @@ public class JXcoreExtension {
                 String bluetoothMacAddress = null;
 
                 if (peerId != null) {
-                    try {
-                        bluetoothMacAddress = peerId.split(BLUETOOTH_MAC_ADDRESS_AND_TOKEN_COUNTER_SEPARATOR)[0];
-                    } catch (IndexOutOfBoundsException e) {
-                        Log.e(TAG, METHOD_NAME_CONNECT + ": Failed to extract the Bluetooth MAC address: " + e.getMessage(), e);
-                    }
+                    bluetoothMacAddress = peerId;
                 }
 
                 if (!BluetoothUtils.isValidBluetoothMacAddress(bluetoothMacAddress)) {
