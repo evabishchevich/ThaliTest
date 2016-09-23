@@ -9,13 +9,17 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.system.ErrnoException;
+import android.system.OsConstants;
 import android.util.Log;
+
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager;
 import org.thaliproject.p2p.btconnectorlib.ConnectionManager.ConnectionManagerState;
 import org.thaliproject.p2p.btconnectorlib.ConnectionManagerSettings;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManager;
 import org.thaliproject.p2p.btconnectorlib.DiscoveryManagerSettings;
 import org.thaliproject.p2p.btconnectorlib.PeerProperties;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -25,8 +29,8 @@ import java.util.UUID;
  */
 public class ConnectionHelper
         implements
-            ConnectionManager.ConnectionManagerListener,
-            DiscoveryManager.DiscoveryManagerListener {
+        ConnectionManager.ConnectionManagerListener,
+        DiscoveryManager.DiscoveryManagerListener {
     private static final String TAG = ConnectionHelper.class.getName();
 
     public static final int NO_PORT_NUMBER = 0;
@@ -156,13 +160,13 @@ public class ConnectionHelper
      *
      * @param stopOnlyListeningForAdvertisements If true, will only stop listening for advertisements.
      *                                           If false, will stop everything.
-     * @param callback The callback to call when we get the (stop) operation result.
+     * @param callback                           The callback to call when we get the (stop) operation result.
      */
     public synchronized void stop(boolean stopOnlyListeningForAdvertisements, JXcoreThaliCallback callback) {
         Log.i(TAG, "stop: "
                 + (stopOnlyListeningForAdvertisements
-                    ? "Stopping only listening for advertisements"
-                    : "Stopping all activities and killing connections"));
+                ? "Stopping only listening for advertisements"
+                : "Stopping all activities and killing connections"));
 
         if (!stopOnlyListeningForAdvertisements) {
             killConnections(false);
@@ -230,7 +234,7 @@ public class ConnectionHelper
      */
     public synchronized boolean disconnectOutgoingConnection(final String peerId) {
         Log.d(TAG, "disconnectOutgoingConnection: Trying to close connection to peer with ID " + peerId);
-        boolean success = mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+        boolean success = closeAndRemoveOutgoingThread(peerId);
 
         if (success) {
             Log.i(TAG, "disconnectOutgoingConnection: Successfully disconnected (peer ID: " + peerId);
@@ -569,6 +573,9 @@ public class ConnectionHelper
 
         try {
             newOutgoingSocketThread = new OutgoingSocketThread(bluetoothSocket, new SocketThreadBase.Listener() {
+
+                private static final String NO_AVAILABLE_PORTS = "No available TCP ports";
+
                 @Override
                 public void onListeningForIncomingConnections(int portNumber) {
                     Log.i(TAG, "onListeningForIncomingConnections: Outgoing connection is using port "
@@ -599,7 +606,7 @@ public class ConnectionHelper
                             + who.getPeerProperties().toString() + " done, closing connection...");
 
                     final String peerId = who.getPeerProperties().getId();
-                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+                    closeAndRemoveOutgoingThread(peerId);
                 }
 
                 @Override
@@ -609,7 +616,22 @@ public class ConnectionHelper
                             + " disconnected: " + errorMessage);
 
                     final String peerId = who.getPeerProperties().getId();
-                    mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+                    closeAndRemoveOutgoingThread(peerId);
+                }
+
+                @Override
+                public void onDisconnected(SocketThreadBase who, Exception exception) {
+                    Log.w(TAG, "onDisconnected: Outgoing connection, peer "
+                            + who.getPeerProperties().toString()
+                            + " disconnected: " + exception.getMessage());
+                    //No available port
+                    if (exception.getCause() instanceof ErrnoException
+                            && ((ErrnoException) exception.getCause()).errno == OsConstants.EMFILE) {
+                        callback.callOnConnectCallback(NO_AVAILABLE_PORTS, null);
+                        closeAndRemoveOutgoingThread(who.getPeerProperties().getId());
+                    } else {
+                        onDisconnected(who, exception.getMessage());
+                    }
                 }
             });
         } catch (IOException e) {
@@ -657,6 +679,10 @@ public class ConnectionHelper
         }
     }
 
+    private boolean closeAndRemoveOutgoingThread(String peerId) {
+        return mConnectionModel.closeAndRemoveOutgoingConnectionThread(peerId);
+    }
+
     /**
      * Constructs the thread around the new incoming connection and sets the callbacks.
      *
@@ -701,6 +727,11 @@ public class ConnectionHelper
                     final IncomingSocketThread incomingSocketThread = (IncomingSocketThread) who;
                     mConnectionModel.closeAndRemoveIncomingConnectionThread(incomingSocketThread.getId());
                 }
+
+                @Override
+                public void onDisconnected(SocketThreadBase who, Exception exception) {
+                    //No need to implement
+                }
             });
         } catch (IOException e) {
             Log.e(TAG, "handleIncomingConnection: Failed to create an incoming connection thread instance: " + e.getMessage(), e);
@@ -740,7 +771,7 @@ public class ConnectionHelper
      * Notifies the JXcore layer about the connection failure.
      *
      * @param peerProperties The properties of the peer we were trying to connect to.
-     * @param errorMessage The error message.
+     * @param errorMessage   The error message.
      */
     private synchronized void handleOutgoingConnectionFailure(PeerProperties peerProperties, String errorMessage) {
         final String bluetoothMacAddress = peerProperties.getBluetoothMacAddress();
@@ -759,12 +790,12 @@ public class ConnectionHelper
     /**
      * Lowers the BLE discovery power settings. If the power settings are already changed, the
      * timer for resetting the settings is restarted.
-     *
+     * <p>
      * This method should be called when a data transfer is started to ensure a reasonable data
      * transfer speed as using BLE for discovery will likely interfere with the data transfer done
      * utilizing Bluetooth sockets because in most modern phones the Bluetooth and BLE stacks
      * share the same 2.4 GHz antenna (along with WiFi).
-     *
+     * <p>
      * Note that changing the power settings in the fly may disturb ongoing connection attempts
      * (and incoming connections) causing connection failures.
      */
