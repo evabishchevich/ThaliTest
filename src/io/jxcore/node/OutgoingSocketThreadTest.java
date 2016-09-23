@@ -26,9 +26,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OutgoingSocketThreadTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     ListenerMock mListenerMock;
     InputStreamMock mInputStreamMock;
     OutputStreamMock mOutputStreamMock;
@@ -39,20 +36,17 @@ public class OutgoingSocketThreadTest {
         mInputStreamMock = new InputStreamMock();
         mOutputStreamMock = new OutputStreamMock();
         mListenerMock = new ListenerMock();
-        mOutgoingSocketThread =
-                new OutgoingSocketThread(null, mListenerMock, mInputStreamMock, mOutputStreamMock);
+        mOutgoingSocketThread = new OutgoingSocketThread(null, mListenerMock, mInputStreamMock, mOutputStreamMock);
     }
 
     @Test
     public void testConstructor() throws Exception {
-        assertThat("mIncomingSocketThread should not be null", mOutgoingSocketThread,
-                is(notNullValue()));
+        assertThat("mIncomingSocketThread should not be null", mOutgoingSocketThread, is(notNullValue()));
     }
 
     @Test
     public void testGetListeningOnPortNumber() throws Exception {
-        assertThat("getListeningOnPortNumber should be 0",
-                mOutgoingSocketThread.getListeningOnPortNumber(), is(equalTo(0)));
+        assertThat("getListeningOnPortNumber should be 0", mOutgoingSocketThread.getListeningOnPortNumber(), is(equalTo(0)));
     }
 
     @Test
@@ -106,7 +100,11 @@ public class OutgoingSocketThreadTest {
 
     private static class OutgoingSocketThreadMock extends OutgoingSocketThread {
 
-        public OutgoingSocketThreadMock(BluetoothSocket bluetoothSocket, Listener listener, InputStream inputStream, OutputStream outputStream) throws IOException {
+        public OutgoingSocketThreadMock(BluetoothSocket bluetoothSocket,
+                                        Listener listener,
+                                        InputStream inputStream,
+                                        OutputStream outputStream)
+                throws IOException {
             super(bluetoothSocket, listener, inputStream, outputStream);
         }
 

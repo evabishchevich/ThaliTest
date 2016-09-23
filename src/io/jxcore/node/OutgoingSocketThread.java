@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.system.Os;
 import android.system.OsConstants;
 import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,9 +68,7 @@ class OutgoingSocketThread extends SocketThreadBase {
         } catch (IOException e) {
             Log.e(mTag, "Failed to create a server socket instance: " + e.getMessage(), e);
             mServerSocket = null;
-            //TODO notify listener that we have no available TCP ports
             mListener.onDisconnected(this, e);
-//            mListener.onDisconnected(this, "Failed to create a server socket instance: " + e.getMessage());
         }
 
         if (mServerSocket != null) {
@@ -95,11 +94,9 @@ class OutgoingSocketThread extends SocketThreadBase {
                 localStreamsCreatedSuccessfully = true;
             } catch (IOException e) {
                 if (!mIsClosing) {
-                    String errorMessage =  "Failed to create local streams: " + e.getMessage();
+                    String errorMessage = "Failed to create local streams: " + e.getMessage();
                     Log.e(mTag, errorMessage, e);
-                    //TODO notify listener that we have no available TCP ports
                     mListener.onDisconnected(this, e);
-//                    mListener.onDisconnected(this, errorMessage);
                 }
             }
 
